@@ -34,6 +34,6 @@ do
 
 	[ "$capacity" -le 25 ] && [ "$status" = "$NF_BAT" ] && warn=$NF_BAT_ALERT
 
-	printf "%s%s%s%% " "$status" "$warn" "$capacity"
+	printf "%s%s%s%s%%" "$status" "$warn" "$ICON_GAP" "$capacity"
 	unset warn
 done | sed 's/ *$//'

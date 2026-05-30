@@ -19,4 +19,4 @@ esac
 
 [ -n "$BUTTON" ] && exit 0
 
-printf '%s %s' "$NF_CLOCK" "$(date '+%-l:%M %p')"
+printf '%s%s%s' "$NF_CLOCK" "$ICON_GAP" "$(date '+%-l:%M %p')"

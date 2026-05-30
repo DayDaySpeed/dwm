@@ -85,19 +85,19 @@ esac
 [ -n "$BUTTON" ] && exit 0
 
 if ! command -v bluetoothctl >/dev/null 2>&1; then
-	printf '%sNA ' "$NF_BT_OFF"
+	printf '%s%sNA' "$NF_BT_OFF" "$ICON_GAP"
 	exit 0
 fi
 
 if ! btctl show | grep -qi "Powered: yes"; then
-	printf '%s ' "$NF_BT_OFF"
+	printf '%s' "$NF_BT_OFF"
 	exit 0
 fi
 
 MACS="$(list_connected_macs)"
 if [ -z "$MACS" ]; then
 	fix_default_sink_if_bt_disconnected
-	printf '%s ' "$NF_BT"
+	printf '%s' "$NF_BT"
 	exit 0
 fi
 
@@ -128,7 +128,7 @@ done
 
 if [ -n "$OUT" ]; then
 	OUT="$(printf '%s\n' "$OUT" | awk '{ if (length($0) > 28) print substr($0,1,28) "..."; else print $0 }')"
-	printf '%s%s ' "$NF_HEADPHONES" "$OUT"
+	printf '%s%s%s' "$NF_HEADPHONES" "$ICON_GAP" "$OUT"
 else
-	printf '%s ' "$NF_BT"
+	printf '%s' "$NF_BT"
 fi
