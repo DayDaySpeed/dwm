@@ -55,6 +55,9 @@ void drw_setscheme(Drw *drw, Clr *scm);
 
 /* Drawing functions */
 void drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int invert);
+void drw_fill(Drw *drw, int x, int y, unsigned int w, unsigned int h, const Clr *clr);
+void drw_clr_hsv(Clr *dest, float h, float s, float v, unsigned short alpha);
+int drw_text_hue(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, float hue, float sat, float val, int invert);
 int drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int invert);
 int drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, const Clr *from, const Clr *to, int gradx0, int gradx1, int invert);
 int drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int *tokenidx, int invert);

@@ -227,38 +227,6 @@ drw_setscheme(Drw *drw, Clr *scm)
 		drw->scheme = scm;
 }
 
-static void
-drw_clr_hsv(Clr *dest, float h, float s, float v, unsigned short alpha)
-{
-	float hp = h / 60.0f;
-
-	while (hp >= 6.0f)
-		hp -= 6.0f;
-	while (hp < 0.0f)
-		hp += 6.0f;
-
-	int i = (int)hp;
-	float f = hp - i;
-	float q = v * (1.0f - s);
-	float t = v * (1.0f - s * f);
-	float p = v * (1.0f - s * (1.0f - f));
-	float r, g, b;
-
-	switch (i) {
-	case 0: r = v; g = t; b = q; break;
-	case 1: r = p; g = v; b = q; break;
-	case 2: r = q; g = v; b = t; break;
-	case 3: r = q; g = p; b = v; break;
-	case 4: r = t; g = q; b = v; break;
-	default: r = v; g = q; b = p; break;
-	}
-
-	dest->color.red   = (unsigned short)(r * 65535.0f);
-	dest->color.green = (unsigned short)(g * 65535.0f);
-	dest->color.blue  = (unsigned short)(b * 65535.0f);
-	dest->color.alpha = alpha;
-}
-
 static Fnt *
 drw_font_for(Drw *drw, long cp)
 {
@@ -293,6 +261,51 @@ drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 	else
 		XDrawRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w - 1, h - 1);
+}
+
+void
+drw_clr_hsv(Clr *dest, float h, float s, float v, unsigned short alpha)
+{
+	float hp = h / 60.0f;
+
+	while (hp >= 6.0f)
+		hp -= 6.0f;
+	while (hp < 0.0f)
+		hp += 6.0f;
+
+	int i = (int)hp;
+	float f = hp - i;
+	float q = v * (1.0f - s);
+	float t = v * (1.0f - s * f);
+	float p = v * (1.0f - s * (1.0f - f));
+	float r, g, b;
+
+	switch (i) {
+	case 0: r = v; g = t; b = q; break;
+	case 1: r = p; g = v; b = q; break;
+	case 2: r = q; g = v; b = t; break;
+	case 3: r = q; g = p; b = v; break;
+	case 4: r = t; g = q; b = v; break;
+	default: r = v; g = q; b = p; break;
+	}
+
+	dest->color.red   = (unsigned short)(r * 65535.0f);
+	dest->color.green = (unsigned short)(g * 65535.0f);
+	dest->color.blue  = (unsigned short)(b * 65535.0f);
+	dest->color.alpha = alpha;
+}
+
+void
+drw_fill(Drw *drw, int x, int y, unsigned int w, unsigned int h, const Clr *clr)
+{
+	XftDraw *d;
+
+	if (!drw || !clr || !w || !h)
+		return;
+
+	d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
+	XftDrawRect(d, clr, x, y, w, h);
+	XftDrawDestroy(d);
 }
 
 int
@@ -564,6 +577,47 @@ drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigne
 			XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)cptr, clen);
 			cx += charw;
 		}
+	}
+
+	XftDrawDestroy(d);
+	return cx;
+}
+
+int
+drw_text_hue(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad,
+             const char *text, float hue, float sat, float val, int invert)
+{
+	int ty, cx, endx;
+	unsigned int charw;
+	long utf8codepoint = 0;
+	size_t utf8charlen;
+	const char *p;
+	XftDraw *d = NULL;
+	Fnt *font;
+	Clr col;
+
+	if (!drw || !drw->scheme || !w || !text || !drw->fonts)
+		return 0;
+
+	XSetForeground(drw->dpy, drw->gc, drw->scheme[invert ? ColFg : ColBg].pixel);
+	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+	d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
+	drw_clr_hsv(&col, hue, sat, val, drw->scheme[ColFg].color.alpha);
+
+	cx = x + lpad;
+	endx = x + w;
+
+	for (p = text; *p && cx < endx; p += utf8charlen) {
+		utf8charlen = utf8decode(p, &utf8codepoint, UTF_SIZ);
+		if (!utf8charlen)
+			break;
+		font = drw_font_for(drw, utf8codepoint);
+		drw_font_getexts(font, p, utf8charlen, &charw, NULL);
+		if (cx + (int)charw > endx)
+			break;
+		ty = y + (h - font->h) / 2 + font->xfont->ascent;
+		XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)p, utf8charlen);
+		cx += charw;
 	}
 
 	XftDrawDestroy(d);
