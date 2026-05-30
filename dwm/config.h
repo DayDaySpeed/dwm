@@ -23,10 +23,11 @@ static char normbgcolor[]     = "#15181E"; // Bar bg color
 static char normfgcolor[]     = "#7FC1E9"; // Bar fg color
 static char statusgradfrom[]  = "#7FC1E9"; // Status text gradient start (left)
 static char statusgradto[]    = "#E97FC1"; // Status text gradient end (right)
-static char selfgcolor[]      = "#15181E"; // Selected fg color
+static char selfgcolor[]      = "#FFFFFF"; // dmenu selected fg; bar uses rainbow when selfgrainbow=1
+static int selfgrainbow       = 1;         // 1: rainbow selected tag/title in bar
 static char selbordercolor[]  = "#8C9CA8"; // Focused window border color
 static char normbordercolor[] = "#15181E"; // Unfocused window border col
-static char selbgcolor[]      = "#7FC1E9"; // Bar fg color
+static char selbgcolor[]      = "#15181E"; // Selected tag bg (same as bar)
 static const unsigned int baralpha  = 0xd0;
 static const unsigned int b_alpha   = OPAQUE;
 static char *colors[][3]      = {
