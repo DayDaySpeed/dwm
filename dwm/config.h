@@ -120,6 +120,7 @@ static const Layout layouts[] = {
 #define TERMCMD   "kitty"
 #define FTERMCMD  TERMCMD, "--class", "kitty-float"
 #define STATUSBAR "dwmblocks"
+/* dwmblocks refresh: kill -(34 + signal) — volume 11→45, mic 12→46, brightness 3→37 */
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
@@ -262,18 +263,18 @@ static const Key keys[] = {
 
 	/* XF* actions */
 	#include <X11/XF86keysym.h>
-	{ 0, XF86XK_AudioMute,         spawn,    SHCMD("wpctl set-mute @DEFAULT_SINK@ toggle; kill -40 $(pidof dwmblocks)") }, // Toggle volume
-	{ 0, XF86XK_AudioLowerVolume,  spawn,    SHCMD("wpctl set-volume @DEFAULT_SINK@ 5%-; kill -40 $(pidof dwmblocks)") },     // Decrease volume
-	{ 0, XF86XK_AudioRaiseVolume,  spawn,    SHCMD("wpctl set-volume @DEFAULT_SINK@ 5%+; kill -40 $(pidof dwmblocks)") },     // Increase volume
-	{ 0, XF86XK_AudioMicMute,      spawn,    SHCMD("wpctl set-mute @DEFAULT_SOURCE@ toggle; kill -40 $(pidof dwmblocks)") }, // Toggle mic
-	{ 0, XF86XK_MonBrightnessUp,   spawn,    SHCMD("xbacklight -inc 10; kill -37 $(pidof dwmblocks)") }, // Increase brightness
-	{ 0, XF86XK_MonBrightnessDown, spawn,    SHCMD("xbacklight -dec 10; kill -37 $(pidof dwmblocks)") }, // Decrease brightness
+	{ 0, XF86XK_AudioMute,         spawn,    SHCMD("wpctl set-mute @DEFAULT_SINK@ toggle; kill -45 $(pidof dwmblocks)") }, // Toggle volume
+	{ 0, XF86XK_AudioLowerVolume,  spawn,    SHCMD("wpctl-vol step @DEFAULT_SINK@ -5; kill -45 $(pidof dwmblocks)") },         // Decrease volume
+	{ 0, XF86XK_AudioRaiseVolume,  spawn,    SHCMD("wpctl-vol step @DEFAULT_SINK@ 5; kill -45 $(pidof dwmblocks)") },          // Increase volume
+	{ 0, XF86XK_AudioMicMute,      spawn,    SHCMD("wpctl set-mute @DEFAULT_SOURCE@ toggle; kill -46 $(pidof dwmblocks)") },   // Toggle mic
+	{ 0, XF86XK_MonBrightnessUp,   spawn,    SHCMD("brightnessctl set +10% 2>/dev/null || xbacklight -inc 10; kill -37 $(pidof dwmblocks)") }, // Increase brightness
+	{ 0, XF86XK_MonBrightnessDown, spawn,    SHCMD("brightnessctl set 10%- 2>/dev/null || xbacklight -dec 10; kill -37 $(pidof dwmblocks)") }, // Decrease brightness
 	{ 0, XF86XK_TouchpadOn,        spawn,    SHCMD("synclient TouchpadOff=0") }, // Enable touchpad
 	{ 0, XF86XK_TouchpadOff,       spawn,    SHCMD("synclient TouchpadOff=1") }, // Disable touchpad
 	{ 0, XF86XK_TouchpadToggle,    spawn,    SHCMD("(synclient | grep 'TouchpadOff.*1' && synclient TouchpadOff=0) || synclient TouchpadOff=1") },
 
 	/* Others */
-	{ 0,      XK_Caps_Lock,  spawn,  SHCMD("kill -35 dwmblocks") }, // Update dwmblocks on CapsLock
+	/* { 0, XK_Caps_Lock, spawn, SHCMD("kill -35 $(pidof dwmblocks)") }, */ /* signal 1: enable capslock block first */
 	{ 0,      XK_Print,      spawn,  SHCMD("scrot -q 100 -p \"$HOME/Pictures/Screenshot-%4Y%m%d_%H%M%S.png\"") },
 	{ MODKEY, XK_Print,	     spawn,  SHCMD("scrot -q 100 -s -p \"$HOME/Pictures/Screenshot-%4Y%m%d_%H%M%S.png\"") },
 
@@ -301,10 +302,12 @@ static const Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
-	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
+	{ ClkWinTitle,          MODKEY,         Button2,        zoom,           {0} },
 	{ ClkStatusText,        0,              Button1,        sigstatusbar,   {.i = 1} },
 	{ ClkStatusText,        0,              Button2,        sigstatusbar,   {.i = 2} },
 	{ ClkStatusText,        0,              Button3,        sigstatusbar,   {.i = 3} },
+	{ ClkStatusText,        0,              Button4,        sigstatusbar,   {.i = 4} },
+	{ ClkStatusText,        0,              Button5,        sigstatusbar,   {.i = 5} },
 	/* placemouse options, choose which feels more natural:
 	 *    0 - tiled position is relative to mouse cursor
 	 *    1 - tiled postiion is relative to window center
