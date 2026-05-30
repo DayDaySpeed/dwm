@@ -8,7 +8,7 @@
 speed=$(awk '/^level/ {print $2; exit}' /proc/acpi/ibm/fan 2>/dev/null) || exit
 
 case "$speed" in
-	auto) printf '%s a' "$NF_FAN" ;;
-	disengaged) printf '%s max' "$NF_FAN" ;;
-	*) printf '%s %s' "$NF_FAN" "$speed" ;;
+	auto) printf '%s%sauto' "$NF_FAN" "$ICON_GAP" ;;
+	disengaged) printf '%s%smax' "$NF_FAN" "$ICON_GAP" ;;
+	*) printf '%s%s%s' "$NF_FAN" "$ICON_GAP" "$speed" ;;
 esac

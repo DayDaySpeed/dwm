@@ -54,9 +54,9 @@ else
 fi
 
 if [ "$brightness" -gt 70 ]; then
-	printf '%s%s' "$NF_BRIGHT_HIGH" "$brightness"
+	printf '%s%s%s%%' "$NF_BRIGHT_HIGH" "$ICON_GAP" "$brightness"
 elif [ "$brightness" -lt 30 ]; then
-	printf '%s%s' "$NF_BRIGHT_LOW" "$brightness"
+	printf '%s%s%s%%' "$NF_BRIGHT_LOW" "$ICON_GAP" "$brightness"
 else
-	printf '%s%s' "$NF_BRIGHT_MED" "$brightness"
+	printf '%s%s%s%%' "$NF_BRIGHT_MED" "$ICON_GAP" "$brightness"
 fi

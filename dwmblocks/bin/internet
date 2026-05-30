@@ -19,22 +19,27 @@ esac
 
 [ -n "$BUTTON" ] && exit 0
 
-wifiicon="$NF_WIFI_OFF "
+wifiicon="$NF_WIFI_OFF"
 wifiname=""
 
 if command -v iw >/dev/null 2>&1; then
 	for iface in $(iw dev 2>/dev/null | awk '$1 == "Interface" { print $2 }'); do
 		[ "$(cat "/sys/class/net/$iface/operstate" 2>/dev/null)" = up ] || continue
 		ssid=$(iw dev "$iface" info 2>/dev/null | awk '/ssid/ { print $2; exit }')
-		wifiicon="$NF_WIFI "
+		wifiicon="$NF_WIFI"
 		wifiname="$ssid"
 		break
 	done
 elif [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = up ]; then
-	wifiicon="$NF_WIFI "
+	wifiicon="$NF_WIFI"
 	wifiname=$(nmcli -t -f active,ssid dev wifi 2>/dev/null | awk -F: '$1 == "yes" { print $2; exit }')
 fi
 
-printf "%s%s%s%s" "$wifiicon" "$wifiname " \
-	"$(sed "s/down/$NF_ETH_OFF/;s/up/$NF_ETH/" /sys/class/net/e*/operstate 2>/dev/null)" \
-	"$(sed "s/.*/$NF_VPN/" /sys/class/net/tun*/operstate 2>/dev/null)"
+eth=$(sed "s/down/$NF_ETH_OFF/;s/up/$NF_ETH/" /sys/class/net/e*/operstate 2>/dev/null | tr '\n' ' ')
+vpn=$(sed "s/.*/$NF_VPN/" /sys/class/net/tun*/operstate 2>/dev/null | tr '\n' ' ')
+
+printf '%s' "$wifiicon"
+[ -n "$wifiname" ] && printf '%s%s' "$ICON_GAP" "$wifiname"
+for seg in $eth $vpn; do
+	[ -n "$seg" ] && printf '%s%s' "$SEG_GAP" "$seg"
+done

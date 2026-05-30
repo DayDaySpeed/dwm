@@ -16,4 +16,4 @@ esac
 [ -n "$BUTTON" ] && exit 0
 
 temp=$(sensors 2>/dev/null | grep "Core 0" | awk '{print $3}' | tr -d "+" | head -1)
-[ -n "$temp" ] && printf '%s %s' "$NF_CPU" "$temp"
+[ -n "$temp" ] && printf '%s%s%s' "$NF_CPU" "$ICON_GAP" "$temp"

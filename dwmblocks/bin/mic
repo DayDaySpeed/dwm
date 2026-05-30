@@ -26,15 +26,15 @@ elif [ -n "$BUTTON" ]; then
 	exit 0
 fi
 
-vol=$("$WVP" pct "$dev") || { printf '%s?%%' "$NF_MIC"; exit 0; }
+vol=$("$WVP" pct "$dev") || { printf '%s%s?%%' "$NF_MIC" "$ICON_GAP"; exit 0; }
 muted=$("$WVP" mute "$dev") || muted=0
 
 if [ "$muted" = 1 ]; then
-	printf ' %s%s%% ' "$NF_MIC_MUTE" "$vol"
+	printf '%s%s%s%%' "$NF_MIC_MUTE" "$ICON_GAP" "$vol"
 elif [ "$vol" -eq 0 ]; then
-	printf ' %s0%% ' "$NF_MIC"
+	printf '%s%s0%%' "$NF_MIC" "$ICON_GAP"
 elif [ "$vol" -eq 100 ]; then
-	printf ' %s100%% ' "$NF_MIC"
+	printf '%s%s100%%' "$NF_MIC" "$ICON_GAP"
 else
-	printf ' %s%s%% ' "$NF_MIC" "$vol"
+	printf '%s%s%s%%' "$NF_MIC" "$ICON_GAP" "$vol"
 fi

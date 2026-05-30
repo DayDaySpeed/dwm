@@ -34,19 +34,19 @@ elif [ -n "$BUTTON" ]; then
 	exit 0
 fi
 
-vol=$("$WVP" pct "$dev") || { printf '%s?%%' "$NF_VOL_MUTE"; exit 0; }
+vol=$("$WVP" pct "$dev") || { printf '%s%s?%%' "$NF_VOL_MUTE" "$ICON_GAP"; exit 0; }
 muted=$("$WVP" mute "$dev") || muted=0
 
 if [ "$muted" = 1 ]; then
-	printf ' %s%s%% ' "$NF_VOL_MUTE" "$vol"
+	printf '%s%s%s%%' "$NF_VOL_MUTE" "$ICON_GAP" "$vol"
 elif [ "$vol" -eq 0 ]; then
-	printf ' %s0%% ' "$NF_VOL_MUTE"
+	printf '%s%s0%%' "$NF_VOL_MUTE" "$ICON_GAP"
 elif [ "$vol" -eq 100 ]; then
-	printf ' %s100%% ' "$NF_VOL_HIGH"
+	printf '%s%s100%%' "$NF_VOL_HIGH" "$ICON_GAP"
 elif [ "$vol" -gt 70 ]; then
-	printf ' %s%s%% ' "$NF_VOL_HIGH" "$vol"
+	printf '%s%s%s%%' "$NF_VOL_HIGH" "$ICON_GAP" "$vol"
 elif [ "$vol" -lt 30 ]; then
-	printf ' %s%s%% ' "$NF_VOL_LOW" "$vol"
+	printf '%s%s%s%%' "$NF_VOL_LOW" "$ICON_GAP" "$vol"
 else
-	printf ' %s%s%% ' "$NF_VOL_MED" "$vol"
+	printf '%s%s%s%%' "$NF_VOL_MED" "$ICON_GAP" "$vol"
 fi

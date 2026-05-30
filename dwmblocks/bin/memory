@@ -13,5 +13,5 @@ esac
 
 [ -n "$BUTTON" ] && exit 0
 
-printf '%s ' "$NF_MEM"
-free --mega | sed -n '2{p;q}' | awk '{printf "%.2fGB/%.2fGB", $3/1000, $2/1000}'
+printf '%s%s' "$NF_MEM" "$ICON_GAP"
+free --mega | sed -n '2{p;q}' | awk '{printf "%.2fGB / %.2fGB", $3/1000, $2/1000}'
