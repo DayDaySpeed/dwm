@@ -1168,7 +1168,7 @@ drawbar(Monitor *m)
 	int x, w, tw = 0, stw = 0, rainbow_idx = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
-	unsigned int i, occ = 0, urg = 0;
+	unsigned int i, urg = 0;
 	Client *c;
 
 	if (!m->showbar)
@@ -1212,7 +1212,6 @@ drawbar(Monitor *m)
 	}
 
 	for (c = m->clients; c; c = c->next) {
-		occ |= c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
 	}
@@ -1220,17 +1219,27 @@ drawbar(Monitor *m)
 	for (i = 0; i < LENGTH(tags); i++) {
 		int issel = m->tagset[m->seltags] & 1 << i;
 		int isurg = urg & 1 << i;
+		float taghue = LENGTH(tags) > 1 ? (float)(i * 300) / (LENGTH(tags) - 1) : 0.0f;
+		unsigned short alpha = scheme[SchemeNorm][ColFg].color.alpha;
 
 		w = TEXTW(tags[i]);
 		drw_setscheme(drw, scheme[issel ? SchemeSel : SchemeNorm]);
-		if (selfgrainbow && issel && !isurg)
-			drw_text_rainbow(drw, x, 0, w, bh, lrpad / 2, tags[i], &rainbow_idx, 0);
+		if (selfgrainbow && !isurg)
+			drw_text_hue(drw, x, 0, w, bh, lrpad / 2, tags[i], taghue, 0.85f, 1.0f, 0);
 		else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], isurg);
-		if (occ & 1 << i)
-			drw_rect(drw, x + boxs, boxs, boxw, boxw,
-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-				isurg);
+		if (issel) {
+			Clr ul;
+			unsigned int ut = 2;
+
+			if (isurg)
+				ul = scheme[SchemeNorm][ColBg];
+			else if (selfgrainbow)
+				drw_clr_hsv(&ul, taghue, 0.85f, 1.0f, alpha);
+			else
+				ul = scheme[SchemeSel][ColFg];
+			drw_fill(drw, x + 2, bh - ut, w - 4, ut, &ul);
+		}
 		x += w;
 	}
 	w = TEXTW(m->ltsymbol);
