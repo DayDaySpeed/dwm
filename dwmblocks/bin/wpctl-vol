@@ -1,0 +1,96 @@
+#!/bin/sh
+# PipeWire volume on a 0–100 scale (0 = quietest, 100 = loudest, no boost above 100).
+#
+#   wpctl-vol pct   <ID>        — print 0–100
+#   wpctl-vol set   <ID> <0-100> — absolute level
+#   wpctl-vol step  <ID> <±N>    — step by N percent points (e.g. 5 or -5)
+#   wpctl-vol scroll <ID> <±steps> — steps × 5% (batch wheel from dwmblocks)
+#   wpctl-vol mute  <ID>        — print 1 if muted else 0
+#   wpctl-vol cap   <ID>        — clamp stored level to 0–100
+
+set -e
+
+cmd=$1
+dev=$2
+arg=$3
+
+[ -n "$cmd" ] && [ -n "$dev" ] || exit 1
+
+vol_pct_read() {
+	wpctl get-volume "$dev" 2>/dev/null | awk '/Volume:/ {
+		v = int($2 * 100 + 0.5)
+		if (v > 100) v = 100
+		if (v < 0) v = 0
+		print v
+		found = 1
+		exit
+	}
+	END { exit !found }'
+}
+
+vol_pct_set() {
+	pct=$1
+	case "$pct" in
+	''|*[!0-9]*) return 1 ;;
+	esac
+	[ "$pct" -gt 100 ] && pct=100
+	[ "$pct" -lt 0 ] && pct=0
+	wpctl set-volume --limit 1.0 "$dev" "${pct}%" >/dev/null 2>&1
+}
+
+vol_unmute() {
+	wpctl set-mute "$dev" 0 >/dev/null 2>&1 || true
+}
+
+vol_apply_delta() {
+	pct=$(vol_pct_read) || return 1
+	new=$(( pct + $1 ))
+	[ "$new" -gt 100 ] && new=100
+	[ "$new" -lt 0 ] && new=0
+	vol_unmute
+	vol_pct_set "$new"
+}
+
+case "$cmd" in
+set)
+	[ -n "$arg" ] || exit 1
+	vol_unmute
+	vol_pct_set "$arg"
+	;;
+step)
+	[ -n "$arg" ] || exit 1
+	vol_apply_delta "$arg"
+	;;
+scroll)
+	steps=$arg
+	[ -n "$steps" ] || exit 1
+	if [ "$steps" -lt 0 ]; then
+		delta=-5
+		inc=1
+	else
+		delta=5
+		inc=-1
+	fi
+	while [ "$steps" != 0 ]; do
+		vol_apply_delta "$delta" || exit 1
+		steps=$(( steps + inc ))
+	done
+	;;
+pct)
+	vol_pct_read
+	;;
+mute)
+	if wpctl get-volume "$dev" 2>/dev/null | grep -q '\[MUTED\]'; then
+		echo 1
+	else
+		echo 0
+	fi
+	;;
+cap)
+	pct=$(vol_pct_read) || exit 0
+	vol_pct_set "$pct"
+	;;
+*)
+	exit 1
+	;;
+esac

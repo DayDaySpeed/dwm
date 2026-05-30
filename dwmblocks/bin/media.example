@@ -1,0 +1,13 @@
+#!/bin/sh
+# Rename to `media` and put in $PATH to enable the media block in config.h.
+# Requires: playerctl
+
+case $BUTTON in
+	1) playerctl play-pause ;;
+	3) playerctl next ;;
+	4) playerctl previous ;;
+esac
+
+[ -n "$BUTTON" ] && exit 0
+
+playerctl metadata --format '{{artist}} — {{title}}' 2>/dev/null | head -c 40

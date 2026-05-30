@@ -3,18 +3,18 @@
 # Prints all batteries, their percentage remaining and an emoji corresponding
 # to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
 
-case $BLOCK_BUTTON in
+case $BUTTON in
 	3) notify-send "🔋 Battery module" "🔋: discharging
 🛑: not charging
 ♻: stagnant charge
 🔌: charging
 ⚡: charged
 ❗: battery very low!
-- Scroll to change adjust xbacklight." ;;
-	4) xbacklight -inc 10 ;;
-	5) xbacklight -dec 10 ;;
-	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+- Left click: (none)" ;;
+	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
 esac
+
+[ -n "$BUTTON" ] && exit 0
 
 # acpi alternative
 # acpi | sed "s/Battery [0-9]: //;s/[Dd]ischarging, /🔋/;s/[Nn]ot charging, /🛑/;s/[Cc]harging, /🔌/;s/[Uu]nknown, /♻️/;s/[Ff]ull, /⚡/;s/ \(remaining\|until charged\)//"; exit

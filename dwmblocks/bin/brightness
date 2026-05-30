@@ -1,14 +1,58 @@
 #!/bin/sh
-# display current brightness
+# Screen brightness. Scroll: ±10%. Prefers brightnessctl, falls back to xbacklight.
 
-# get first two digits of brightness value
-brightnum=$(xbacklight -get)
-brightness=$(printf "${brightnum%.*}")
+bright_set() {
+	if command -v brightnessctl >/dev/null 2>&1; then
+		brightnessctl set "$1" >/dev/null 2>&1
+	elif command -v xbacklight >/dev/null 2>&1; then
+		case "$1" in
+		+10%|10%+) xbacklight -inc 10 ;;
+		10%-|-10%) xbacklight -dec 10 ;;
+		esac
+	fi
+}
 
-if [[ "$brightness" -gt "70" ]]; then
-	echo "☀$brightness"
-elif [[ "$brightness" -lt "30" ]]; then
-	echo "🌦$brightness"
+bright_scroll() {
+	steps=$1
+	if [ "$steps" -lt 0 ]; then
+		op='10%-'
+		inc=1
+	else
+		op='+10%'
+		inc=-1
+	fi
+	while [ "$steps" != 0 ]; do
+		bright_set "$op"
+		steps=$(( steps + inc ))
+	done
+}
+
+if [ -n "$SCROLL_STEPS" ]; then
+	bright_scroll "$SCROLL_STEPS"
+elif [ -n "$BUTTON" ]; then
+	case $BUTTON in
+	4) bright_set "+10%" ;;
+	5) bright_set "10%-" ;;
+	esac
+	exit 0
+fi
+
+if command -v brightnessctl >/dev/null 2>&1; then
+	cur=$(brightnessctl get) || exit
+	max=$(brightnessctl max) || exit
+	[ "$max" -gt 0 ] || exit
+	brightness=$(( cur * 100 / max ))
+elif command -v xbacklight >/dev/null 2>&1; then
+	brightnum=$(xbacklight -get) || exit
+	brightness=${brightnum%.*}
 else
-	echo "⛅$brightness"
+	exit 1
+fi
+
+if [ "$brightness" -gt 70 ]; then
+	printf '☀%s' "$brightness"
+elif [ "$brightness" -lt 30 ]; then
+	printf '🌦%s' "$brightness"
+else
+	printf '⛅%s' "$brightness"
 fi

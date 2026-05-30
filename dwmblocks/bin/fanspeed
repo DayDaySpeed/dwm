@@ -1,13 +1,12 @@
-#!/bin/bash
-# get fan speed
+#!/bin/sh
+# IBM/Lenovo fan level via /proc/acpi/ibm/fan
 
-speed=$(cat /proc/acpi/ibm/fan | grep level | head -n 1 | awk '{print $2}')
+[ -n "$BUTTON" ] && exit 0
 
-if [ "$speed" = "auto" ]; then
-	echo " a"
-else if [ "$speed" = "disengaged" ]; then
-	echo " max"
-else
-	echo " $speed"
-fi
-fi
+speed=$(awk '/^level/ {print $2; exit}' /proc/acpi/ibm/fan 2>/dev/null) || exit
+
+case "$speed" in
+	auto) printf ' a' ;;
+	disengaged) printf ' max' ;;
+	*) printf ' %s' "$speed" ;;
+esac
