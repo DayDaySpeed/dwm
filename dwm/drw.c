@@ -489,20 +489,32 @@ drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsign
 	return cx;
 }
 
+static int
+drw_iswordchar(long cp)
+{
+	return (cp >= '0' && cp <= '9') ||
+	       (cp >= 'A' && cp <= 'Z') ||
+	       (cp >= 'a' && cp <= 'z') ||
+	       (cp >= 0x3400 && cp <= 0x4DBF) ||
+	       (cp >= 0x4E00 && cp <= 0x9FFF) ||
+	       cp == '_';
+}
+
 int
 drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad,
-                 const char *text, int gradx0, int gradx1, int invert)
+                 const char *text, int *tokenidx, int invert)
 {
 	int ty, cx, endx;
 	unsigned int charw;
 	long utf8codepoint = 0;
-	size_t utf8charlen;
-	const char *p;
+	size_t utf8charlen, toklen, rem;
+	const char *p, *tokstart, *cptr;
+	float hue;
 	XftDraw *d = NULL;
 	Fnt *font;
 	Clr col;
 
-	if (!drw || !drw->scheme || !w || !text || !drw->fonts)
+	if (!drw || !drw->scheme || !w || !text || !drw->fonts || !tokenidx)
 		return 0;
 
 	XSetForeground(drw->dpy, drw->gc, drw->scheme[invert ? ColFg : ColBg].pixel);
@@ -512,24 +524,46 @@ drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigne
 	cx = x + lpad;
 	endx = x + w;
 
-	for (p = text; *p && cx < endx; p += utf8charlen) {
-		float t, hue;
+	for (p = text; *p && cx < endx; ) {
+		long cp;
+		size_t clen;
+
 		utf8charlen = utf8decode(p, &utf8codepoint, UTF_SIZ);
 		if (!utf8charlen)
 			break;
-		font = drw_font_for(drw, utf8codepoint);
-		drw_font_getexts(font, p, utf8charlen, &charw, NULL);
-		if (cx + (int)charw > endx)
-			break;
-		if (gradx1 > gradx0)
-			t = (float)(cx - gradx0) / (gradx1 - gradx0);
-		else
-			t = 0.0f;
-		hue = t * 300.0f;
-		drw_clr_hsv(&col, hue, 0.85f, 1.0f, drw->scheme[ColFg].color.alpha);
-		ty = y + (h - font->h) / 2 + font->xfont->ascent;
-		XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)p, utf8charlen);
-		cx += charw;
+
+		tokstart = p;
+		toklen = utf8charlen;
+
+		if (drw_iswordchar(utf8codepoint)) {
+			p += utf8charlen;
+			while (*p && cx < endx) {
+				clen = utf8decode(p, &cp, UTF_SIZ);
+				if (!clen || !drw_iswordchar(cp))
+					break;
+				toklen += clen;
+				p += clen;
+			}
+		} else {
+			p += utf8charlen;
+		}
+
+		hue = (*tokenidx * 47) % 300;
+		(*tokenidx)++;
+
+		for (cptr = tokstart, rem = toklen; rem > 0 && cx < endx; rem -= clen, cptr += clen) {
+			clen = utf8decode(cptr, &utf8codepoint, UTF_SIZ);
+			if (!clen)
+				break;
+			font = drw_font_for(drw, utf8codepoint);
+			drw_font_getexts(font, cptr, clen, &charw, NULL);
+			if (cx + (int)charw > endx)
+				break;
+			drw_clr_hsv(&col, hue, 0.85f, 1.0f, drw->scheme[ColFg].color.alpha);
+			ty = y + (h - font->h) / 2 + font->xfont->ascent;
+			XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)cptr, clen);
+			cx += charw;
+		}
 	}
 
 	XftDrawDestroy(d);

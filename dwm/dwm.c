@@ -1165,7 +1165,7 @@ dragmfact(const Arg *arg)
 void
 drawbar(Monitor *m)
 {
-	int x, w, tw = 0, stw = 0;
+	int x, w, tw = 0, stw = 0, rainbow_idx = 0;
 	int boxs = drw->fonts->h / 9;
 	int boxw = drw->fonts->h / 6 + 2;
 	unsigned int i, occ = 0, urg = 0;
@@ -1224,7 +1224,7 @@ drawbar(Monitor *m)
 		w = TEXTW(tags[i]);
 		drw_setscheme(drw, scheme[issel ? SchemeSel : SchemeNorm]);
 		if (selfgrainbow && issel && !isurg)
-			drw_text_rainbow(drw, x, 0, w, bh, lrpad / 2, tags[i], 0, m->ww, 0);
+			drw_text_rainbow(drw, x, 0, w, bh, lrpad / 2, tags[i], &rainbow_idx, 0);
 		else
 			drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], isurg);
 		if (occ & 1 << i)
@@ -1241,7 +1241,7 @@ drawbar(Monitor *m)
 		if (m->sel) {
 			drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			if (selfgrainbow && m == selmon)
-				drw_text_rainbow(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0, m->ww, 0);
+				drw_text_rainbow(drw, x, 0, w, bh, lrpad / 2, m->sel->name, &rainbow_idx, 0);
 			else
 				drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
 			if (m->sel->isfloating)
