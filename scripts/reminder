@@ -1,0 +1,28 @@
+#!/bin/bash
+# Set a timed reminder (notify-send).
+
+msg=$(dmenu -p "Reminder message:")
+[ -z "$msg" ] && exit 0
+
+when=$(dmenu -p "When? (5m / 30m / 1h / 90s):")
+[ -z "$when" ] && exit 0
+
+case "$when" in
+	*[0-9]s) secs="${when%s}" ;;
+	*[0-9]m) secs=$((${when%m} * 60)) ;;
+	*[0-9]h) secs=$((${when%h} * 3600)) ;;
+	*)
+		if command -v at >/dev/null 2>&1; then
+			echo "notify-send 'Reminder' '$msg'" | at "$when" 2>/dev/null \
+				&& notify-send "Reminder" "$msg at $when" && exit 0
+		fi
+		notify-send -u critical "Reminder" "Unrecognized time: $when"
+		exit 1
+		;;
+esac
+
+[ "$secs" -gt 0 ] 2>/dev/null || { notify-send -u critical "Reminder" "Invalid duration"; exit 1; }
+
+(sleep "$secs" && notify-send "Reminder" "$msg") &
+disown
+notify-send "Reminder set" "$msg in $when"

@@ -1,0 +1,30 @@
+#!/bin/bash
+# Download YouTube audio to ~/Music (XF86Search).
+
+paste() {
+	if command -v wl-paste >/dev/null 2>&1; then wl-paste
+	elif command -v xclip >/dev/null 2>&1; then xclip -o
+	else notify-send -u critical "Downloader" "Need wl-paste or xclip"; exit 1; fi
+}
+
+clip=$(paste)
+[[ -z "$clip" ]] && notify-send -u critical "Downloader" "Clipboard is empty!" && exit 1
+
+url=$(printf '%s' "$clip" | dmenu -i -p "Enter a valid YouTube URL:")
+[[ -z "$url" ]] && notify-send -u critical "Downloader" "There is no URL!" && exit 1
+
+if [[ $url =~ (http://|http://www.|https://|https://www.)youtu(.be|be.com)/([a-zA-Z0-9_-]+|watch\?v=[a-zA-Z0-9_-]+) ]]; then
+	[ ! -d "$HOME/Music" ] && mkdir -p "$HOME/Music"
+	dl=youtube-dl
+	command -v yt-dlp >/dev/null && dl=yt-dlp
+	cookies_arg=()
+	[ -f "$HOME/cookies" ] && cookies_arg=(--cookies "$HOME/cookies")
+	notify-send "Downloader" "Starting download: $url"
+	$dl -x --embed-thumbnail --audio-format mp3 -f bestaudio --audio-quality 0 -c -i \
+		"${cookies_arg[@]}" \
+		-o "$HOME/Music/%(title)s.%(ext)s" "$url" \
+		&& notify-send "Downloader" "Saved to $HOME/Music" \
+		|| notify-send -u critical "Downloader" "Download failed (need yt-dlp or youtube-dl)"
+else
+	notify-send -u critical "Downloader" "URL does not look like YouTube"
+fi

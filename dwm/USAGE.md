@@ -359,8 +359,8 @@ master 区窗口 **水平排列在屏幕中央**，尺寸约为屏幕的 90% 或
 
 | 快捷键 | 功能 |
 |--------|------|
-| **Print** | 全屏截图（`scrot`，保存至 `~/Pictures/`） |
-| **Super + Print** | 区域截图 |
+| **Print** | 区域截图（`flameshot gui`，框选并标注，保存至 `~/Pictures/`） |
+| **Super + Print** | 区域截图（`flameshot gui`） |
 | **XF86AudioMute** | 静音/取消静音，并刷新状态栏音量 |
 | **XF86AudioLowerVolume** | 音量 −5% |
 | **XF86AudioRaiseVolume** | 音量 +5% |

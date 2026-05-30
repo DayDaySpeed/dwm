@@ -275,8 +275,8 @@ static const Key keys[] = {
 
 	/* Others */
 	/* { 0, XK_Caps_Lock, spawn, SHCMD("kill -35 $(pidof dwmblocks)") }, */ /* signal 1: enable capslock block first */
-	{ 0,      XK_Print,      spawn,  SHCMD("scrot -q 100 -p \"$HOME/Pictures/Screenshot-%4Y%m%d_%H%M%S.png\"") },
-	{ MODKEY, XK_Print,	     spawn,  SHCMD("scrot -q 100 -s -p \"$HOME/Pictures/Screenshot-%4Y%m%d_%H%M%S.png\"") },
+	{ 0,      XK_Print,      spawn,  SHCMD("flameshot gui -p \"$HOME/Pictures\"") },
+	{ MODKEY, XK_Print,	     spawn,  SHCMD("flameshot gui -p \"$HOME/Pictures\"") },
 
 	/* Scripts */
 	{ SUPERKEY,           XK_d,      spawn, { .v = &scripts[0] } }, // Select display
