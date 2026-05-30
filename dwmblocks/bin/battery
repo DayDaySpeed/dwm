@@ -1,34 +1,39 @@
 #!/bin/sh
 
-# Prints all batteries, their percentage remaining and an emoji corresponding
-# to charge status (🔌 for plugged up, 🔋 for discharging on battery, etc.).
+# Battery percentage and charge status (Nerd Font icons).
+
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
 
 case $BUTTON in
-	3) notify-send "🔋 Battery module" "🔋: discharging
-🛑: not charging
-♻: stagnant charge
-🔌: charging
-⚡: charged
-❗: battery very low!
-- Left click: (none)" ;;
+	3) notify-send "$NF_BAT 电池" "$NF_BAT: 放电中
+$NF_BAT_IDLE: 未充电
+$NF_BAT_UNKNOWN: 状态未知
+$NF_BAT_CHARGE: 充电中
+$NF_BAT_FULL: 已充满
+$NF_BAT_ALERT: 电量过低
+- 左键: 无" ;;
 	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
 esac
 
 [ -n "$BUTTON" ] && exit 0
 
-# acpi alternative
-# acpi | sed "s/Battery [0-9]: //;s/[Dd]ischarging, /🔋/;s/[Nn]ot charging, /🛑/;s/[Cc]harging, /🔌/;s/[Uu]nknown, /♻️/;s/[Ff]ull, /⚡/;s/ \(remaining\|until charged\)//"; exit
-
-# Loop through all attached batteries.
 for battery in /sys/class/power_supply/BAT?
 do
-	# Get its remaining capacity and charge status.
 	capacity=$(cat "$battery"/capacity 2>/dev/null) || break
-	status=$(sed "s/[Dd]ischarging/🔋/;s/[Nn]ot charging/🛑/;s/[Cc]harging/🔌/;s/[Uu]nknown/♻️/;s/[Ff]ull/|⚡/" "$battery"/status)
+	raw=$(cat "$battery"/status 2>/dev/null)
+	case "$raw" in
+	*[Dd]ischarging*) status=$NF_BAT ;;
+	*[Nn]ot\ charging*) status=$NF_BAT_IDLE ;;
+	*[Cc]harging*) status=$NF_BAT_CHARGE ;;
+	*[Uu]nknown*) status=$NF_BAT_UNKNOWN ;;
+	*[Ff]ull*) status=$NF_BAT_FULL ;;
+	*) status=$NF_BAT ;;
+	esac
 
-	# If it is discharging and 25% or less, we will add a ❗ as a warning.
-	 [ "$capacity" -le 25 ] && [ "$status" = "🔋" ] && warn="❗"
+	[ "$capacity" -le 25 ] && [ "$status" = "$NF_BAT" ] && warn=$NF_BAT_ALERT
 
-	printf "%s%s%s%s%% " "$status" "$warn" "$capacity"
+	printf "%s%s%s%% " "$status" "$warn" "$capacity"
 	unset warn
 done | sed 's/ *$//'

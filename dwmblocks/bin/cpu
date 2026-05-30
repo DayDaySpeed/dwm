@@ -1,14 +1,19 @@
 #!/bin/sh
 
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
+
 case $BUTTON in
-	1) notify-send "🖥 CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
+	1) notify-send "$NF_CPU CPU" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
 	2) setsid -f "${TERMINAL:-kitty}" -e htop ;;
-	3) notify-send "🖥 CPU module " "\- Shows CPU temperature.
-- Click to show intensive processes.
-- Middle click to open htop." ;;
+	3) notify-send "$NF_CPU CPU" "\- 显示 CPU 温度
+- 左键: 高占用进程
+- 中键: htop" ;;
 	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
 esac
 
 [ -n "$BUTTON" ] && exit 0
 
-sensors 2>/dev/null | grep "Core 0" | awk '{print $3}' | tr -d "+" | head -1
+temp=$(sensors 2>/dev/null | grep "Core 0" | awk '{print $3}' | tr -d "+" | head -1)
+[ -n "$temp" ] && printf '%s %s' "$NF_CPU" "$temp"

@@ -1,0 +1,18 @@
+# Shared helpers for dwmblocks status scripts.
+# Sourced as: . "$(command -v dwmblocks-lib 2>/dev/null || echo "${0%/*}/dwmblocks-lib")"
+
+_dwmblocks_bindir() {
+	_me=$(command -v "${0##*/}" 2>/dev/null) || _me=$0
+	case "$_me" in
+	*/*) printf '%s\n' "${_me%/*}" ;;
+	*)
+		for _d in "$HOME/.local/bin" /usr/local/bin; do
+			[ -f "$_d/icons" ] && { printf '%s\n' "$_d"; return; }
+		done
+		printf '%s\n' .
+		;;
+	esac
+}
+
+DWMBLOCKS_BIN=$(_dwmblocks_bindir)
+. "$DWMBLOCKS_BIN/icons"

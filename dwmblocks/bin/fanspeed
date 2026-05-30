@@ -1,12 +1,14 @@
 #!/bin/sh
 # IBM/Lenovo fan level via /proc/acpi/ibm/fan
 
+. "$HOME/.local/bin/dwmblocks-lib" 2>/dev/null || . /usr/local/bin/dwmblocks-lib 2>/dev/null || . "${0%/*}/dwmblocks-lib"
+
 [ -n "$BUTTON" ] && exit 0
 
 speed=$(awk '/^level/ {print $2; exit}' /proc/acpi/ibm/fan 2>/dev/null) || exit
 
 case "$speed" in
-	auto) printf ' a' ;;
-	disengaged) printf ' max' ;;
-	*) printf ' %s' "$speed" ;;
+	auto) printf '%s a' "$NF_FAN" ;;
+	disengaged) printf '%s max' "$NF_FAN" ;;
+	*) printf '%s %s' "$NF_FAN" "$speed" ;;
 esac

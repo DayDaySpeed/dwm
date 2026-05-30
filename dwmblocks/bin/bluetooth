@@ -2,6 +2,10 @@
 # Bluetooth: show adapter state and connected device names (with battery if available).
 # Auto-switches default audio sink to BT when connected, back to wired when not.
 
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
+
 btctl() {
 	if command -v timeout >/dev/null 2>&1; then
 		timeout 3 bluetoothctl "$@" 2>/dev/null
@@ -70,10 +74,10 @@ case $BUTTON in
 			setsid -f "${TERMINAL:-st}" -e bluetoothctl
 		fi
 		;;
-	3) notify-send "🔵 蓝牙" "\- 左键: 打开蓝牙管理
-📴: 蓝牙已关闭
-🔵: 已开启，无连接
-🎧: 已连接设备（名称:电量）
+	3) notify-send "$NF_BT 蓝牙" "\- 左键: 打开蓝牙管理
+$NF_BT_OFF: 蓝牙已关闭
+$NF_BT: 已开启，无连接
+$NF_HEADPHONES: 已连接设备（名称:电量）
 无 bluetoothctl 时显示 NA" ;;
 	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
 esac
@@ -81,19 +85,19 @@ esac
 [ -n "$BUTTON" ] && exit 0
 
 if ! command -v bluetoothctl >/dev/null 2>&1; then
-	printf '🔵NA '
+	printf '%sNA ' "$NF_BT_OFF"
 	exit 0
 fi
 
 if ! btctl show | grep -qi "Powered: yes"; then
-	printf '📴 '
+	printf '%s ' "$NF_BT_OFF"
 	exit 0
 fi
 
 MACS="$(list_connected_macs)"
 if [ -z "$MACS" ]; then
 	fix_default_sink_if_bt_disconnected
-	printf '🔵 '
+	printf '%s ' "$NF_BT"
 	exit 0
 fi
 
@@ -124,7 +128,7 @@ done
 
 if [ -n "$OUT" ]; then
 	OUT="$(printf '%s\n' "$OUT" | awk '{ if (length($0) > 28) print substr($0,1,28) "..."; else print $0 }')"
-	printf '🎧%s ' "$OUT"
+	printf '%s%s ' "$NF_HEADPHONES" "$OUT"
 else
-	printf '🔵 '
+	printf '%s ' "$NF_BT"
 fi

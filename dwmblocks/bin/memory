@@ -1,14 +1,17 @@
 #!/bin/sh
 
+. "$HOME/.local/bin/dwmblocks-lib" 2>/dev/null || . /usr/local/bin/dwmblocks-lib 2>/dev/null || . "${0%/*}/dwmblocks-lib"
+
 case $BUTTON in
-	1) notify-send "🧠 Memory hogs" "$(ps axch -o cmd:15,%mem --sort=-%mem | head)" ;;
+	1) notify-send "$NF_MEM 内存" "$(ps axch -o cmd:15,%mem --sort=-%mem | head)" ;;
 	2) setsid -f "$TERMINAL" -e htop ;;
-	3) notify-send "🧠 Memory module" "\- Shows Memory Used/Total.
-- Click to show memory hogs.
-- Middle click to open htop." ;;
+	3) notify-send "$NF_MEM 内存" "\- 显示已用/总量
+- 左键: 内存占用进程
+- 中键: htop" ;;
 	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
 esac
 
 [ -n "$BUTTON" ] && exit 0
 
+printf '%s ' "$NF_MEM"
 free --mega | sed -n '2{p;q}' | awk '{printf "%.2fGB/%.2fGB", $3/1000, $2/1000}'

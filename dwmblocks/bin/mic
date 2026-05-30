@@ -1,7 +1,11 @@
 #!/bin/sh
 # Microphone: 0% = lowest gain, 100% = highest (mute is separate).
 
-WVP="${0%/*}/wpctl-vol"
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
+
+WVP="$DWMBLOCKS_BIN/wpctl-vol"
 [ -x "$WVP" ] || WVP=wpctl-vol
 dev=@DEFAULT_SOURCE@
 
@@ -15,22 +19,22 @@ if [ -n "$SCROLL_STEPS" ]; then
 elif [ -n "$BUTTON" ]; then
 	case $BUTTON in
 	1|2) wpctl set-mute "$dev" toggle ;;
-	3) notify-send "🎤 麦克风" "0% 最低 · 100% 最高\n滚轮 ±5% · 左/中键静音" ;;
+	3) notify-send "$NF_MIC 麦克风" "0% 最低 · 100% 最高\n滚轮 ±5% · 左/中键静音" ;;
 		4) "$WVP" scroll "$dev" 1 ;;
 		5) "$WVP" scroll "$dev" -1 ;;
 	esac
 	exit 0
 fi
 
-vol=$("$WVP" pct "$dev") || { printf '🎤?%%'; exit 0; }
+vol=$("$WVP" pct "$dev") || { printf '%s?%%' "$NF_MIC"; exit 0; }
 muted=$("$WVP" mute "$dev") || muted=0
 
 if [ "$muted" = 1 ]; then
-	printf ' 🔇🎤%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_MIC_MUTE" "$vol"
 elif [ "$vol" -eq 0 ]; then
-	printf ' 🎤0%% '
+	printf ' %s0%% ' "$NF_MIC"
 elif [ "$vol" -eq 100 ]; then
-	printf ' 🎤100%% '
+	printf ' %s100%% ' "$NF_MIC"
 else
-	printf ' 🎤%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_MIC" "$vol"
 fi

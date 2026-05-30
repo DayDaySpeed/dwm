@@ -1,6 +1,10 @@
 #!/bin/sh
 # Screen brightness. Scroll: ±10%. Prefers brightnessctl, falls back to xbacklight.
 
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
+
 bright_set() {
 	if command -v brightnessctl >/dev/null 2>&1; then
 		brightnessctl set "$1" >/dev/null 2>&1
@@ -50,9 +54,9 @@ else
 fi
 
 if [ "$brightness" -gt 70 ]; then
-	printf '☀%s' "$brightness"
+	printf '%s%s' "$NF_BRIGHT_HIGH" "$brightness"
 elif [ "$brightness" -lt 30 ]; then
-	printf '🌦%s' "$brightness"
+	printf '%s%s' "$NF_BRIGHT_LOW" "$brightness"
 else
-	printf '⛅%s' "$brightness"
+	printf '%s%s' "$NF_BRIGHT_MED" "$brightness"
 fi
