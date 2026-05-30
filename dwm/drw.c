@@ -259,6 +259,17 @@ drw_clr_hsv(Clr *dest, float h, float s, float v, unsigned short alpha)
 	dest->color.alpha = alpha;
 }
 
+static Fnt *
+drw_font_for(Drw *drw, long cp)
+{
+	Fnt *font;
+
+	for (font = drw->fonts; font; font = font->next)
+		if (XftCharExists(drw->dpy, font->xfont, cp))
+			return font;
+	return drw->fonts;
+}
+
 static void
 drw_clr_lerp(Clr *dest, const Clr *from, const Clr *to, float t)
 {
@@ -452,16 +463,15 @@ drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsign
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 	d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
 
-	font = drw->fonts;
 	cx = x + lpad;
 	endx = x + w;
-	ty = y + (h - font->h) / 2 + font->xfont->ascent;
 
 	for (p = text; *p && cx < endx; p += utf8charlen) {
 		float t;
 		utf8charlen = utf8decode(p, &utf8codepoint, UTF_SIZ);
 		if (!utf8charlen)
 			break;
+		font = drw_font_for(drw, utf8codepoint);
 		drw_font_getexts(font, p, utf8charlen, &charw, NULL);
 		if (cx + (int)charw > endx)
 			break;
@@ -470,6 +480,7 @@ drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsign
 		else
 			t = 0.0f;
 		drw_clr_lerp(&col, from, to, t);
+		ty = y + (h - font->h) / 2 + font->xfont->ascent;
 		XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)p, utf8charlen);
 		cx += charw;
 	}
@@ -498,16 +509,15 @@ drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigne
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 	d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
 
-	font = drw->fonts;
 	cx = x + lpad;
 	endx = x + w;
-	ty = y + (h - font->h) / 2 + font->xfont->ascent;
 
 	for (p = text; *p && cx < endx; p += utf8charlen) {
 		float t, hue;
 		utf8charlen = utf8decode(p, &utf8codepoint, UTF_SIZ);
 		if (!utf8charlen)
 			break;
+		font = drw_font_for(drw, utf8codepoint);
 		drw_font_getexts(font, p, utf8charlen, &charw, NULL);
 		if (cx + (int)charw > endx)
 			break;
@@ -517,6 +527,7 @@ drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigne
 			t = 0.0f;
 		hue = t * 300.0f;
 		drw_clr_hsv(&col, hue, 0.85f, 1.0f, drw->scheme[ColFg].color.alpha);
+		ty = y + (h - font->h) / 2 + font->xfont->ascent;
 		XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)p, utf8charlen);
 		cx += charw;
 	}
