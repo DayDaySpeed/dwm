@@ -65,6 +65,7 @@
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
+#define STATUS_SCROLL_LOCK_MS   400
 #define RIGHTOF(a,b)            (a.y_org > b.y_org) || \
                                 ((a.y_org == b.y_org) && (a.x_org > b.x_org))
 
@@ -209,6 +210,7 @@ static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
 static void attach(Client *c);
 static void attachstack(Client *c);
+static int statusbarclick(int mx);
 static void buttonpress(XEvent *e);
 static void checkotherwm(void);
 static void cleanup(void);
@@ -332,9 +334,11 @@ static pid_t winpid(Window w);
 
 /* variables */
 static const char broken[] = "broken";
-static char stext[256];
+static char stext[512];
 static int statusw;
 static int statussig;
+static int scroll_lock_sig;
+static Time scroll_lock_until;
 static pid_t statuspid = -1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
@@ -528,6 +532,59 @@ attachstack(Client *c)
 	c->mon->stack = c;
 }
 
+/* Map status-bar click x to block signal; walk stext like drawbar/updatestatus. */
+static int
+statusbarclick(int mx)
+{
+	unsigned int stw = getsystraywidth();
+	int rx, x = 0, tw;
+	char *text, *s, ch;
+
+	if (mx < selmon->ww - statusw - (int)stw || mx >= selmon->ww - (int)stw)
+		return 0;
+
+	rx = mx - (selmon->ww - statusw - (int)stw);
+	statussig = 0;
+
+	for (text = s = stext; *s; s++) {
+		if ((unsigned char)(*s) < ' ') {
+			ch = *s;
+			statussig = (unsigned char)ch;
+			*s = '\0';
+			tw = TEXTW(text) - lrpad;
+			*s = ch;
+			if (rx >= x && rx < x + tw)
+				return 1;
+			x += tw;
+			text = s + 1;
+		}
+	}
+	if (*text) {
+		tw = TEXTW(text) - lrpad;
+		if (rx >= x && rx < x + tw)
+			return 1;
+	}
+	statussig = 0;
+	return 0;
+}
+
+static void
+statusbar_input(XButtonPressedEvent *ev)
+{
+	if (ev->button == Button4 || ev->button == Button5) {
+		if (scroll_lock_sig && ev->time < scroll_lock_until)
+			statussig = scroll_lock_sig;
+		else if (statusbarclick(ev->x)) {
+			scroll_lock_sig = statussig;
+			scroll_lock_until = ev->time + STATUS_SCROLL_LOCK_MS;
+		} else
+			scroll_lock_sig = 0;
+	} else {
+		scroll_lock_sig = 0;
+		statusbarclick(ev->x);
+	}
+}
+
 void
 buttonpress(XEvent *e)
 {
@@ -536,7 +593,6 @@ buttonpress(XEvent *e)
 	Client *c;
 	Monitor *m;
 	XButtonPressedEvent *ev = &e->xbutton;
-	char *text, *s, ch;
 
 	click = ClkRootWin;
 	/* focus monitor if necessary */
@@ -546,6 +602,8 @@ buttonpress(XEvent *e)
 		focus(NULL);
 	}
 	if (ev->window == selmon->barwin) {
+		unsigned int stw = getsystraywidth();
+
 		i = x = 0;
 		do
 			x += TEXTW(tags[i]);
@@ -555,22 +613,10 @@ buttonpress(XEvent *e)
 			arg.ui = 1 << i;
 		} else if (ev->x < x + TEXTW(selmon->ltsymbol))
 			click = ClkLtSymbol;
-		else if (ev->x > selmon->ww - statusw) {
-			x = selmon->ww - statusw;
+		else if (ev->x >= (int)(selmon->ww - statusw - stw)
+				&& ev->x < (int)selmon->ww - (int)stw) {
 			click = ClkStatusText;
-			statussig = 0;
-			for (text = s = stext; *s && x <= ev->x; s++) {
-				if ((unsigned char)(*s) < ' ') {
-					ch = *s;
-					*s = '\0';
-					x += TEXTW(text) - lrpad;
-					*s = ch;
-					text = s + 1;
-					if (x >= ev->x)
-						break;
-					statussig = ch;
-				}
-			}
+			statusbar_input(ev);
 		} else
 			click = ClkWinTitle;
 	} else if ((c = wintoclient(ev->window))) {
