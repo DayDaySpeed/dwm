@@ -57,7 +57,7 @@ void drw_setscheme(Drw *drw, Clr *scm);
 void drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int invert);
 int drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int invert);
 int drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, const Clr *from, const Clr *to, int gradx0, int gradx1, int invert);
-int drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int gradx0, int gradx1, int invert);
+int drw_text_rainbow(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int *tokenidx, int invert);
 
 /* Map functions */
 void drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h);
