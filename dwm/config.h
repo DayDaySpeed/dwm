@@ -21,6 +21,8 @@ static char *fonts[]          = { "JetBrainsMono Nerd Font:size=12", "Noto Sans 
 static char dmenufont[]       = "JetBrainsMono Nerd Font:size=12";
 static char normbgcolor[]     = "#15181E"; // Bar bg color
 static char normfgcolor[]     = "#7FC1E9"; // Bar fg color
+static char statusgradfrom[]  = "#7FC1E9"; // Status text gradient start (left)
+static char statusgradto[]    = "#E97FC1"; // Status text gradient end (right)
 static char selfgcolor[]      = "#15181E"; // Selected fg color
 static char selbordercolor[]  = "#8C9CA8"; // Focused window border color
 static char normbordercolor[] = "#15181E"; // Unfocused window border col
@@ -161,6 +163,8 @@ ResourcePref resources[] = {
 		{ "normbgcolor",        STRING,  &normbgcolor },
 		{ "normbordercolor",    STRING,  &normbordercolor },
 		{ "normfgcolor",        STRING,  &normfgcolor },
+		{ "statusgradfrom",     STRING,  &statusgradfrom },
+		{ "statusgradto",       STRING,  &statusgradto },
 		{ "selbgcolor",         STRING,  &selbgcolor },
 		{ "selbordercolor",     STRING,  &selbordercolor },
 		{ "selfgcolor",         STRING,  &selfgcolor },

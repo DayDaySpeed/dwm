@@ -227,6 +227,19 @@ drw_setscheme(Drw *drw, Clr *scm)
 		drw->scheme = scm;
 }
 
+static void
+drw_clr_lerp(Clr *dest, const Clr *from, const Clr *to, float t)
+{
+	if (t < 0.0f)
+		t = 0.0f;
+	else if (t > 1.0f)
+		t = 1.0f;
+	dest->color.red   = from->color.red   + (unsigned short)((to->color.red   - from->color.red)   * t);
+	dest->color.green = from->color.green + (unsigned short)((to->color.green - from->color.green) * t);
+	dest->color.blue  = from->color.blue  + (unsigned short)((to->color.blue  - from->color.blue)  * t);
+	dest->color.alpha = from->color.alpha + (unsigned short)((to->color.alpha - from->color.alpha) * t);
+}
+
 void
 drw_rect(Drw *drw, int x, int y, unsigned int w, unsigned int h, int filled, int invert)
 {
@@ -384,6 +397,53 @@ no_match:
 		XftDrawDestroy(d);
 
 	return x + (render ? w : 0);
+}
+
+int
+drw_text_gradient(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad,
+                  const char *text, const Clr *from, const Clr *to,
+                  int gradx0, int gradx1, int invert)
+{
+	int ty, cx, endx;
+	unsigned int charw;
+	long utf8codepoint = 0;
+	size_t utf8charlen;
+	const char *p;
+	XftDraw *d = NULL;
+	Fnt *font;
+	Clr col;
+
+	if (!drw || !drw->scheme || !w || !text || !drw->fonts || !from || !to)
+		return 0;
+
+	XSetForeground(drw->dpy, drw->gc, drw->scheme[invert ? ColFg : ColBg].pixel);
+	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+	d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
+
+	font = drw->fonts;
+	cx = x + lpad;
+	endx = x + w;
+	ty = y + (h - font->h) / 2 + font->xfont->ascent;
+
+	for (p = text; *p && cx < endx; p += utf8charlen) {
+		float t;
+		utf8charlen = utf8decode(p, &utf8codepoint, UTF_SIZ);
+		if (!utf8charlen)
+			break;
+		drw_font_getexts(font, p, utf8charlen, &charw, NULL);
+		if (cx + (int)charw > endx)
+			break;
+		if (gradx1 > gradx0)
+			t = (float)(cx - gradx0) / (gradx1 - gradx0);
+		else
+			t = 0.0f;
+		drw_clr_lerp(&col, from, to, t);
+		XftDrawStringUtf8(d, &col, font->xfont, cx, ty, (XftChar8 *)p, utf8charlen);
+		cx += charw;
+	}
+
+	XftDrawDestroy(d);
+	return cx;
 }
 
 void

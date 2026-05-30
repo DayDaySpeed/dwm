@@ -367,6 +367,7 @@ static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
+static Clr statusgrad[2];
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
@@ -1182,17 +1183,22 @@ drawbar(Monitor *m)
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon) { /* status is only drawn on selected monitor */
 		char *text, *s, ch;
+		int gradx0, gradx1;
+
 		drw_setscheme(drw, scheme[SchemeNorm]);
 
 		/* We need to account for the systray. */
-		x = -(getsystraywidth());
+		x = -stw;
+		gradx0 = m->ww - statusw - stw;
+		gradx1 = m->ww - stw;
 
 		for (text = s = stext; *s; s++) {
 			if ((unsigned char)(*s) < ' ') {
 				ch = *s;
 				*s = '\0';
 				tw = TEXTW(text) - lrpad;
-				drw_text(drw, m->ww - statusw + x, 0, tw, bh, 0, text, 0);
+				drw_text_gradient(drw, m->ww - statusw + x, 0, tw, bh, 0, text,
+				                  &statusgrad[0], &statusgrad[1], gradx0, gradx1, 0);
 				x += tw;
 				*s = ch;
 				text = s + 1;
@@ -1200,7 +1206,8 @@ drawbar(Monitor *m)
 		}
 
 		tw = TEXTW(text) - lrpad + 2;
-		drw_text(drw, m->ww - statusw + x, 0, tw, bh, 0, text, 0);
+		drw_text_gradient(drw, m->ww - statusw + x, 0, tw, bh, 0, text,
+		                  &statusgrad[0], &statusgrad[1], gradx0, gradx1, 0);
 		tw = statusw;
 	}
 
@@ -2542,6 +2549,8 @@ setup(void)
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+	drw_clr_create(drw, &statusgrad[0], statusgradfrom, alphas[SchemeNorm][ColFg]);
+	drw_clr_create(drw, &statusgrad[1], statusgradto, alphas[SchemeNorm][ColFg]);
 	/* init system tray */
 	if (showsystray)
 		updatesystray(0);
