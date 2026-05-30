@@ -1,0 +1,7 @@
+#!/bin/sh
+# Restore wallpaper after display layout changes (used by displayselect).
+
+dir="$HOME/wallpapers"
+[ -d "$dir" ] || exit 0
+pape=$(ls "$dir" 2>/dev/null | sort -R | tail -1)
+[ -n "$pape" ] && command -v hsetroot >/dev/null && hsetroot -cover "$dir/$pape"

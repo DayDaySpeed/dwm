@@ -1,0 +1,11 @@
+#!/bin/bash
+# Show disk usage in the terminal (Alt+Shift+u).
+
+printf '\n=== Mounted filesystems ===\n\n'
+df -h | awk 'NR==1 || $1 ~ /^\// {print}'
+
+printf '\n=== Home directory (top 15) ===\n\n'
+du -xh --max-depth=1 "$HOME" 2>/dev/null | sort -hr | head -15
+
+printf '\nPress Enter to close...\n'
+read -r _

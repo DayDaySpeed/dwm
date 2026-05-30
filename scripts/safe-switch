@@ -1,0 +1,33 @@
+#!/bin/sh
+# This script will reduce brightness to 1,
+# will disable the touchpad,
+# will disable networking,
+# will turn off audio
+# will disable microphone
+# and will lock the screen.
+
+# Check if doas is installed
+# If it is, use it instead of sudo
+[ $(which doas 2>/dev/null) ] && root="doas" || root="sudo"
+
+# Disable the touchpad
+synclient TouchpadOff=1
+
+# Get a list of network cards
+netcards=$(ifconfig | grep -Eo "^(e|v|w)[a-z0-9]+")
+
+# Disable Networking
+for card in $netcards
+do
+	$root ifconfig $card down
+done
+
+# Turn off audio and disable microphone
+wpctl set-mute @DEFAULT_SINK@ 1; kill -45 $(pidof dwmblocks) 2>/dev/null
+wpctl set-mute @DEFAULT_SOURCE@ 1; kill -46 $(pidof dwmblocks) 2>/dev/null
+
+# Reduce brightness to minimum
+brightnessctl set 1 2>/dev/null || xbacklight -set 1 2>/dev/null
+
+# Lock the screen
+slock
