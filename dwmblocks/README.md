@@ -37,7 +37,7 @@ other scripts that might signal to that module.
 
 Like i3blocks, this build allows you to build in additional actions into your
 scripts in response to click events.  See the above linked scripts for examples
-of this using the `$BLOCK_BUTTON` variable.
+of this using the `$BUTTON` variable (set by the statuscmd patch).
 
 For this feature to work, you need the appropriate patch in dwm as well. See
 [here](https://dwm.suckless.org/patches/statuscmd/).

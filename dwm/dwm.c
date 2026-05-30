@@ -546,21 +546,26 @@ statusbarclick(int mx)
 	rx = mx - (selmon->ww - statusw - (int)stw);
 	statussig = 0;
 
+	/* stext layout: [sig][text][sig][text]… — measure text before each sig. */
 	for (text = s = stext; *s; s++) {
 		if ((unsigned char)(*s) < ' ') {
 			ch = *s;
-			statussig = (unsigned char)ch;
 			*s = '\0';
-			tw = TEXTW(text) - lrpad;
-			*s = ch;
-			if (rx >= x && rx < x + tw)
-				return 1;
-			x += tw;
+			if (text < s) {
+				tw = TEXTW(text) - lrpad;
+				*s = ch;
+				if (rx >= x && rx < x + tw)
+					return 1;
+				x += tw;
+			} else {
+				*s = ch;
+			}
+			statussig = (unsigned char)ch;
 			text = s + 1;
 		}
 	}
 	if (*text) {
-		tw = TEXTW(text) - lrpad;
+		tw = TEXTW(text) - lrpad + 2;
 		if (rx >= x && rx < x + tw)
 			return 1;
 	}

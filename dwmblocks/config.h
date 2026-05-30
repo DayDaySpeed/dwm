@@ -11,14 +11,17 @@
 static const Block blocks[] = {
 	// Icon  Command    Interval (s)    Update signal
 	//{"",    "capslock",           1,     1},
-	{"",    "brightness",         5,     3},
 	{"",    "memory",            10,     4},
 	{"",    "cpu",                5,     5},
-	{"",    "media",              3,     6},
+	/* {"", "media", 3, 6}, */ /* needs `media` script in $PATH; see bin/media.example */
 	{"",    "fanspeed",           5,     7},
 	{"",    "internet",           5,     8},
+	{"",    "bluetooth",          5,     6},
 	{"",    "battery",           10,     9},
 	{"",    "clock",             30,    10},
+	{"",    "volume",             0,    11},
+	{"",    "brightness",         5,     3},
+	{"",    "mic",                0,    12},
 };
 
 //Sets delimiter between status commands. NULL character ('\0') means no delimiter.

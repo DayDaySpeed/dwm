@@ -1,0 +1,36 @@
+#!/bin/sh
+# Microphone: 0% = lowest gain, 100% = highest (mute is separate).
+
+WVP="${0%/*}/wpctl-vol"
+[ -x "$WVP" ] || WVP=wpctl-vol
+dev=@DEFAULT_SOURCE@
+
+case "$1" in
+up)   exec "$WVP" step "$dev" 5 ;;
+down) exec "$WVP" step "$dev" -5 ;;
+esac
+
+if [ -n "$SCROLL_STEPS" ]; then
+	"$WVP" scroll "$dev" "$SCROLL_STEPS"
+elif [ -n "$BUTTON" ]; then
+	case $BUTTON in
+	1|2) wpctl set-mute "$dev" toggle ;;
+	3) notify-send "🎤 麦克风" "0% 最低 · 100% 最高\n滚轮 ±5% · 左/中键静音" ;;
+		4) "$WVP" scroll "$dev" 1 ;;
+		5) "$WVP" scroll "$dev" -1 ;;
+	esac
+	exit 0
+fi
+
+vol=$("$WVP" pct "$dev") || { printf '🎤?%%'; exit 0; }
+muted=$("$WVP" mute "$dev") || muted=0
+
+if [ "$muted" = 1 ]; then
+	printf ' 🔇🎤%s%% ' "$vol"
+elif [ "$vol" -eq 0 ]; then
+	printf ' 🎤0%% '
+elif [ "$vol" -eq 100 ]; then
+	printf ' 🎤100%% '
+else
+	printf ' 🎤%s%% ' "$vol"
+fi

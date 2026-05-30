@@ -1,0 +1,130 @@
+#!/bin/sh
+# Bluetooth: show adapter state and connected device names (with battery if available).
+# Auto-switches default audio sink to BT when connected, back to wired when not.
+
+btctl() {
+	if command -v timeout >/dev/null 2>&1; then
+		timeout 3 bluetoothctl "$@" 2>/dev/null
+	else
+		bluetoothctl "$@" 2>/dev/null
+	fi
+}
+
+is_bt_mac_connected() {
+	mac="$1"
+	btctl info "$mac" | grep -qi "Connected: yes" && return 0
+
+	if command -v pactl >/dev/null 2>&1; then
+		[ -z "${cards_dump:-}" ] && cards_dump="$(pactl list cards 2>/dev/null || true)"
+		card_mac="$(printf '%s\n' "$mac" | tr ':' '_')"
+		profile="$(printf '%s\n' "$cards_dump" | awk -v cm="$card_mac" '
+			$0 ~ "bluez_card."cm { found=1 }
+			found && /Active Profile:/ { print $3; exit }
+		')"
+		[ -n "$profile" ] && [ "$profile" != "off" ] && return 0
+	fi
+	return 1
+}
+
+list_connected_macs() {
+	for dev in $(btctl devices | awk '{print $2}'); do
+		is_bt_mac_connected "$dev" && echo "$dev"
+	done | awk 'NF && !seen[$0]++'
+}
+
+fix_default_sink_if_bt_disconnected() {
+	command -v pactl >/dev/null 2>&1 || return 0
+	current="$(pactl get-default-sink 2>/dev/null || true)"
+	case "$current" in
+	bluez_output.*)
+		fallback="$(pactl list short sinks 2>/dev/null | awk '$2 !~ /^bluez_output\./ {print $2; exit}')"
+		[ -z "$fallback" ] && fallback="$(pactl list short sinks 2>/dev/null | awk 'NR==1 {print $2}')"
+		[ -n "$fallback" ] && pactl set-default-sink "$fallback" >/dev/null 2>&1 || true
+		;;
+	esac
+}
+
+switch_to_bt_sink_if_connected() {
+	command -v pactl >/dev/null 2>&1 || return 0
+	current="$(pactl get-default-sink 2>/dev/null || true)"
+	case "$current" in
+	bluez_output.*) return 0 ;;
+	esac
+	bt_sink=""
+	for mac in $MACS; do
+		cand="$(pactl list short sinks 2>/dev/null | awk -v m="$mac" '$2 == ("bluez_output." m) {print $2; exit}')"
+		if [ -n "$cand" ]; then
+			bt_sink="$cand"
+			break
+		fi
+	done
+	[ -z "$bt_sink" ] && bt_sink="$(pactl list short sinks 2>/dev/null | awk '/^[0-9]+\tbluez_output\./ {print $2; exit}')"
+	[ -n "$bt_sink" ] && pactl set-default-sink "$bt_sink" >/dev/null 2>&1 || true
+}
+
+case $BUTTON in
+	1)
+		if command -v blueman-manager >/dev/null 2>&1; then
+			setsid -f blueman-manager
+		else
+			setsid -f "${TERMINAL:-st}" -e bluetoothctl
+		fi
+		;;
+	3) notify-send "🔵 蓝牙" "\- 左键: 打开蓝牙管理
+📴: 蓝牙已关闭
+🔵: 已开启，无连接
+🎧: 已连接设备（名称:电量）
+无 bluetoothctl 时显示 NA" ;;
+	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
+esac
+
+[ -n "$BUTTON" ] && exit 0
+
+if ! command -v bluetoothctl >/dev/null 2>&1; then
+	printf '🔵NA '
+	exit 0
+fi
+
+if ! btctl show | grep -qi "Powered: yes"; then
+	printf '📴 '
+	exit 0
+fi
+
+MACS="$(list_connected_macs)"
+if [ -z "$MACS" ]; then
+	fix_default_sink_if_bt_disconnected
+	printf '🔵 '
+	exit 0
+fi
+
+switch_to_bt_sink_if_connected
+
+OUT=""
+for MAC in $MACS; do
+	INFO="$(btctl info "$MAC")"
+	NAME="$(echo "$INFO" | awk -F': ' '/Name:/ {print $2; exit}')"
+	[ -z "$NAME" ] && NAME="$(echo "$INFO" | awk -F': ' '/Alias:/ {print $2; exit}')"
+	[ -z "$NAME" ] && NAME="$MAC"
+
+	ITEM="$NAME"
+	if command -v upower >/dev/null 2>&1; then
+		BAT_PATH="$(upower -e 2>/dev/null | grep -i "$(echo "$MAC" | tr ':' '_')" | head -n 1)"
+		if [ -n "$BAT_PATH" ]; then
+			PERCENT="$(upower -i "$BAT_PATH" 2>/dev/null | awk '/percentage:/ {print $2; exit}')"
+			[ -n "$PERCENT" ] && ITEM="$ITEM:$PERCENT"
+		fi
+	fi
+
+	if [ -z "$OUT" ]; then
+		OUT="$ITEM"
+	else
+		OUT="$OUT, $ITEM"
+	fi
+done
+
+if [ -n "$OUT" ]; then
+	OUT="$(printf '%s\n' "$OUT" | awk '{ if (length($0) > 28) print substr($0,1,28) "..."; else print $0 }')"
+	printf '🎧%s ' "$OUT"
+else
+	printf '🔵 '
+fi
