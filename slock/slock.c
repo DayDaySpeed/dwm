@@ -97,10 +97,8 @@ dontkillme(void)
 	fprintf(f, "%d", OOM_SCORE_ADJ_MIN);
 	if (fclose(f)) {
 		if (errno == EACCES)
-			die("slock: unable to disable OOM killer. "
-			    "Make sure to suid or sgid slock.\n");
-		else
-			die("slock: fclose %s: %s\n", oomfile, strerror(errno));
+			return;
+		die("slock: fclose %s: %s\n", oomfile, strerror(errno));
 	}
 }
 #endif
