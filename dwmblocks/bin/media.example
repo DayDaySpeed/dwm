@@ -2,6 +2,8 @@
 # Rename to `media` and put in $PATH to enable the media block in config.h.
 # Requires: playerctl
 
+. "$HOME/.local/bin/dwmblocks-lib" 2>/dev/null || . /usr/local/bin/dwmblocks-lib 2>/dev/null || . "${0%/*}/dwmblocks-lib"
+
 case $BUTTON in
 	1) playerctl play-pause ;;
 	3) playerctl next ;;
@@ -10,4 +12,5 @@ esac
 
 [ -n "$BUTTON" ] && exit 0
 
-playerctl metadata --format '{{artist}} — {{title}}' 2>/dev/null | head -c 40
+meta=$(playerctl metadata --format '{{artist}} — {{title}}' 2>/dev/null | head -c 40)
+[ -n "$meta" ] && printf '%s %s' "$NF_MEDIA" "$meta"

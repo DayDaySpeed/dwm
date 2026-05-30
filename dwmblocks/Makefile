@@ -19,13 +19,16 @@ install: dwmblocks
 	mkdir -p $(BINDIR)
 	cp -f dwmblocks $(BINDIR)/
 	chmod 755 $(BINDIR)/dwmblocks
+	cp -f bin/icons bin/dwmblocks-lib $(BINDIR)/
+	chmod 644 $(BINDIR)/icons
+	chmod 755 $(BINDIR)/dwmblocks-lib
 	for s in $(SCRIPTS); do \
 		cp -f $$s $(BINDIR)/$$(basename $$s); \
 		chmod 755 $(BINDIR)/$$(basename $$s); \
 	done
 
 uninstall:
-	rm -f $(BINDIR)/dwmblocks
+	rm -f $(BINDIR)/dwmblocks $(BINDIR)/icons $(BINDIR)/dwmblocks-lib
 	for s in $(SCRIPTS); do rm -f $(BINDIR)/$$(basename $$s); done
 
 .PHONY: clean install uninstall

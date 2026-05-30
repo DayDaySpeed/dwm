@@ -1,7 +1,11 @@
 #!/bin/sh
 # Speaker: 0% = quietest, 100% = loudest (mute is separate, middle-click).
 
-WVP="${0%/*}/wpctl-vol"
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
+
+WVP="$DWMBLOCKS_BIN/wpctl-vol"
 [ -x "$WVP" ] || WVP=wpctl-vol
 dev=@DEFAULT_SINK@
 
@@ -23,26 +27,26 @@ elif [ -n "$BUTTON" ]; then
 		notify-send "音量" "请安装 pavucontrol 或 helvum"
 		;;
 	2) wpctl set-mute "$dev" toggle ;;
-	3) notify-send "🔊 扬声器" "0% 最安静 · 100% 最响\n滚轮 ±5% · 中键静音（与 0% 无关）" ;;
+	3) notify-send "$NF_VOL_HIGH 扬声器" "0% 最安静 · 100% 最响\n滚轮 ±5% · 中键静音（与 0% 无关）" ;;
 		4) "$WVP" scroll "$dev" 1 ;;
 		5) "$WVP" scroll "$dev" -1 ;;
 	esac
 	exit 0
 fi
 
-vol=$("$WVP" pct "$dev") || { printf '🔇?%%'; exit 0; }
+vol=$("$WVP" pct "$dev") || { printf '%s?%%' "$NF_VOL_MUTE"; exit 0; }
 muted=$("$WVP" mute "$dev") || muted=0
 
 if [ "$muted" = 1 ]; then
-	printf ' 🔇%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_VOL_MUTE" "$vol"
 elif [ "$vol" -eq 0 ]; then
-	printf ' 🔇0%% '
+	printf ' %s0%% ' "$NF_VOL_MUTE"
 elif [ "$vol" -eq 100 ]; then
-	printf ' 🔊100%% '
+	printf ' %s100%% ' "$NF_VOL_HIGH"
 elif [ "$vol" -gt 70 ]; then
-	printf ' 🔊%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_VOL_HIGH" "$vol"
 elif [ "$vol" -lt 30 ]; then
-	printf ' 🔈%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_VOL_LOW" "$vol"
 else
-	printf ' 🔉%s%% ' "$vol"
+	printf ' %s%s%% ' "$NF_VOL_MED" "$vol"
 fi

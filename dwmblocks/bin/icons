@@ -1,0 +1,43 @@
+# Nerd Font icons (Material Design) for dwmblocks status scripts.
+# Requires a Nerd Font in the dwm bar, e.g. JetBrainsMono Nerd Font.
+
+# Audio
+NF_VOL_HIGH=󰕾
+NF_VOL_MED=󰖀
+NF_VOL_LOW=󰕿
+NF_VOL_MUTE=󰝟
+NF_MIC=󰍬
+NF_MIC_MUTE=󰍭
+
+# Display
+NF_BRIGHT_HIGH=󰃠
+NF_BRIGHT_MED=󰃞
+NF_BRIGHT_LOW=󰃝
+
+# Network
+NF_WIFI=󰤨
+NF_WIFI_OFF=󰤯
+NF_ETH=󰈀
+NF_ETH_OFF=󰌙
+NF_VPN=󰖂
+
+# Bluetooth
+NF_BT=󰂯
+NF_BT_OFF=󰂲
+NF_HEADPHONES=󰋋
+
+# Power
+NF_BAT=󰁹
+NF_BAT_CHARGE=󰂄
+NF_BAT_FULL=󰂁
+NF_BAT_IDLE=󰂋
+NF_BAT_UNKNOWN=󰂺
+NF_BAT_ALERT=󰂱
+
+# System
+NF_CPU=󰻠
+NF_MEM=󰍛
+NF_FAN=󰐥
+NF_CLOCK=󰥔
+NF_CAPS=󰪾
+NF_MEDIA=󰎈

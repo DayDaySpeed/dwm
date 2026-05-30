@@ -1,14 +1,16 @@
 #!/bin/sh
-# show if caps lock is on or off
+# Show if caps lock is on or off
 
-# caps lock status
+. "$HOME/.local/bin/dwmblocks-lib" 2>/dev/null || . /usr/local/bin/dwmblocks-lib 2>/dev/null || . "${0%/*}/dwmblocks-lib"
+
 capslock=$(xset q | grep "Caps Lock:" | awk '{print $4}')
 
 case $BUTTON in
-        1) 
-        pkill -RTMIN+26 "${STATUSBAR:-dwmblocks}";;
-        3) notify-send "Caps Lock indicator" "Caps Lock is currently $capslock" ;;
-        6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+	1) pkill -RTMIN+26 "${STATUSBAR:-dwmblocks}" ;;
+	3) notify-send "$NF_CAPS Caps Lock" "Caps Lock: $capslock" ;;
+	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-printf "$capslock"
+[ -n "$BUTTON" ] && exit 0
+
+[ "$capslock" = on ] && printf '%s' "$NF_CAPS"
