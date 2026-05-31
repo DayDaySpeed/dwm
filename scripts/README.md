@@ -27,7 +27,8 @@
 | `reminder` | Alt+Shift+r | 定时提醒 |
 | `disk-usage` | Alt+Shift+u | 磁盘用量 |
 | `downloader` | XF86Search | YouTube 转 MP3（yt-dlp / youtube-dl） |
+| `killkittytag` | （无） | 关闭当前 tag 上所有 kitty 窗口；`~/.config/scripts/killkittytag` 或 `launcher` |
 
 ## 依赖
 
-各脚本按需依赖：`dmenu`、`slock`、`ffmpeg`、`hsetroot`、`synclient`、`wpctl`、`notify-send`、`xdotool`、`xrandr`、`yt-dlp` 等。缺失时对应脚本会报错或降级。
+各脚本按需依赖：`dmenu`、`slock`、`ffmpeg`、`hsetroot`、`synclient`、`wpctl`、`notify-send`、`xwininfo`、`xkill`、`xrandr`、`yt-dlp` 等。缺失时对应脚本会报错或降级。
