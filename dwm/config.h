@@ -211,7 +211,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask, XK_i,     setlayout, {.v = &layouts[7]} }, // Grid
 	{ MODKEY,           XK_o,     setlayout, {.v = &layouts[8]} }, // Nrowgrid
 	{ MODKEY|ShiftMask, XK_o,     setlayout, {.v = &layouts[9]} }, // Horizgrd
-	{ MODKEY,           XK_p,     setlayout, {.v = &layouts[10]} }, // Gapless
+	{ MODKEY|ControlMask, XK_p,   setlayout, {.v = &layouts[10]} }, // Gapless
 	{ MODKEY|ShiftMask, XK_p,     setlayout, {.v = &layouts[11]} }, // Centrdm
 	{ MODKEY|ShiftMask, XK_space, togglefloating, {0} }, // Floating
 
