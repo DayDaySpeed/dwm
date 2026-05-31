@@ -1,3 +1,4 @@
 *.o
 dwm/dwm
 slock/slock
+.cache/
