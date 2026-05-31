@@ -45,7 +45,7 @@ kill -44 $(pidof dwmblocks)                 # 刷新 clock 模块（signal 10）
 |------|--------|------|
 | 终端 | `kitty` | `TERMCMD`，浮动终端类名 `kitty-float` |
 | 启动器 | `rofi` / `dmenu_run` | Super+d / Super+Shift+d |
-| 文件管理器 | `dolphin` | Super+Shift+f |
+| 文件管理器 | `thunar` | Super+Shift+f |
 | 浏览器 | `librewolf-bin` | Super+Shift+w |
 | 脚本目录 | `~/.config/scripts/` | `S_PATH`，相对家目录 |
 | 状态栏字体 | JetBrainsMono Nerd Font + Noto Sans CJK SC | 前者显示 Nerd 图标，后者 fallback 中文 |
@@ -371,7 +371,7 @@ xset dpms "$IDLE_SEC" "$IDLE_SEC" "$IDLE_SEC"
 | **Super + Shift + Enter** | Scratchpad 终端（120×34） |
 | **Super + d** | Rofi 应用启动器 |
 | **Super + Shift + d** | dmenu 应用启动器 |
-| **Super + Shift + f** | 文件管理器（`dolphin`） |
+| **Super + Shift + f** | 文件管理器（`thunar`） |
 | **Super + Shift + w** | 浏览器（`librewolf-bin`） |
 
 ## 脚本快捷键
