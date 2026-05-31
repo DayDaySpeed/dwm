@@ -20,3 +20,4 @@ DWMBLOCKS_BIN=$(_dwmblocks_bindir)
 # Spacing: icon↔value inside a block; block↔block separator is dwmblocks config.h delim.
 : "${ICON_GAP:= }"
 : "${SEG_GAP:=  }"
+: "${TERMINAL:=kitty}"
