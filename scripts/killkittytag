@@ -1,0 +1,54 @@
+#!/bin/sh
+# Close all kitty windows on the current dwm tag (visible on screen).
+# dwm hides other tags by moving windows off-screen (negative X).
+
+: "${DISPLAY:=:0}"
+export DISPLAY
+
+client_ids() {
+	xprop -root _NET_CLIENT_LIST 2>/dev/null | grep -o '0x[0-9a-f]*'
+}
+
+wm_class() {
+	xprop -id "$1" WM_CLASS 2>/dev/null | sed 's/^WM_CLASS(STRING) = //; s/"//g'
+}
+
+window_abs_x() {
+	xwininfo -id "$1" 2>/dev/null | awk '/Absolute upper-left X:/ { print $4; exit }'
+}
+
+close_window() {
+	if command -v xdotool >/dev/null 2>&1 &&
+		xdotool windowclose "$1" 2>/dev/null; then
+		return 0
+	fi
+	if command -v wmctrl >/dev/null 2>&1 &&
+		wmctrl -ic "$1" 2>/dev/null; then
+		return 0
+	fi
+	if xkill -id "$1" 2>/dev/null; then
+		return 0
+	fi
+	command -v kitty >/dev/null 2>&1 &&
+		kitty @ close-window --match "id:$1" 2>/dev/null
+}
+
+closed=0
+for id in $(client_ids); do
+	case $(wm_class "$id") in
+	*kitty*|*Kitty*) ;;
+	*) continue ;;
+	esac
+	x=$(window_abs_x "$id")
+	[ -z "$x" ] && continue
+	[ "$x" -lt 0 ] && continue
+	close_window "$id" && closed=$((closed + 1))
+done
+
+if command -v notify-send >/dev/null 2>&1; then
+	if [ "$closed" -gt 0 ]; then
+		notify-send "kitty" "已关闭 ${closed} 个终端"
+	else
+		notify-send "kitty" "当前 tag 没有 kitty 窗口"
+	fi
+fi
