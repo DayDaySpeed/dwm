@@ -1,6 +1,8 @@
 #!/bin/sh
 
-. "$HOME/.local/bin/dwmblocks-lib" 2>/dev/null || . /usr/local/bin/dwmblocks-lib 2>/dev/null || . "${0%/*}/dwmblocks-lib"
+for _lib in "${0%/*}/dwmblocks-lib" "$HOME/.local/bin/dwmblocks-lib" /usr/local/bin/dwmblocks-lib; do
+	[ -r "$_lib" ] && . "$_lib" && break
+done
 
 case $BUTTON in
 	1) notify-send "$NF_MEM 内存" "$(ps axch -o cmd:15,%mem --sort=-%mem | head)" ;;
@@ -8,7 +10,7 @@ case $BUTTON in
 	3) notify-send "$NF_MEM 内存" "\- 显示已用/总量
 - 左键: 内存占用进程
 - 中键: htop" ;;
-	6) "${TERMINAL:-st}" -e "${EDITOR:-vi}" "$0" ;;
+	6) "$TERMINAL" -e "${EDITOR:-vi}" "$0" ;;
 esac
 
 [ -n "$BUTTON" ] && exit 0
