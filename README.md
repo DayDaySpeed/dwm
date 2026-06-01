@@ -353,21 +353,19 @@ xset dpms "$IDLE_SEC" "$IDLE_SEC" "$IDLE_SEC"
 
 建议放在 X 会话启动末尾，避免被其他程序覆盖 DPMS 默认值。
 
-### UI 缩放（2560×1440 全局 1.5×）
+### UI 缩放（2560×1440 全局 1.35×）
 
-大屏统一放大，避免「状态栏/输入法太小」与「文件对话框超出屏幕」互相打架：
-
-| 机制 | 配置 | 作用 |
-|------|------|------|
-| X11 / dwm | `~/.Xresources` → `Xft.dpi: 144` | 状态栏、dmenu 等 Xft 字体 |
-| GTK | `gtk-xft-dpi=147456`（144×1024） | Thunar、portal 文件对话框 |
-| Qt / fcitx5 | `QT_SCALE_FACTOR=1.5` + `classicui.conf` | 输入法候选框 |
-| Electron | `~/.config/electron-flags.conf` → `1.5` | Cursor 等 |
-| dwm 字号 | `config.h` 中 `size=14` | 标签栏/标题（配合 144 DPI） |
+| 机制 | 配置 |
+|------|------|
+| X11 / dwm | `Xft.dpi: 130` |
+| GTK | `gtk-xft-dpi=133120` |
+| Qt / fcitx5 | `QT_SCALE_FACTOR=1.35` |
+| Electron | `1.35` |
+| dwm 字号 | `size=14` |
 
 **不要**再设 `GDK_SCALE=1` / `GDK_DPI_SCALE=1` 强制缩小，否则 GTK 对话框会与 Xft 缩放不一致而错位超出屏幕。
 
-修改后重新登录 X 会话。若仍想更大，把 `Xft.dpi` 改为 `156`（1.625×）或 `168`（1.75×），并同步 `gtk-xft-dpi`（= 新 DPI × 1024）与 `QT_SCALE_FACTOR`。
+修改后重新登录 X 会话。调整倍数时：`Xft.dpi = 96 × 倍数`，`gtk-xft-dpi = Xft.dpi × 1024`，同步 `QT_SCALE_FACTOR` 与 Electron flags。
 
 ## 系统操作
 
@@ -541,9 +539,12 @@ memory │ cpu │ fanspeed │ internet │ bluetooth │ battery │ clock │
 
 #### mic 麦克风
 
-- **左键 / 中键**：静音切换
-- **滚轮**：增益 ±5%
+- **左键**：打开 `pavucontrol`「录音」页
+- **中键**：静音切换
+- **滚轮**：增益 ±5%（状态栏 0–100；**100% = pavucontrol 153%**，与图形界面拉满一致）
 - **右键**：帮助
+
+扬声器 **volume** 仍为 0–100 ↔ pavucontrol 100%。
 
 ## 窗口规则
 

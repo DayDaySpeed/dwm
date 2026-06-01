@@ -8,6 +8,7 @@ done
 WVP="$DWMBLOCKS_BIN/wpctl-vol"
 [ -x "$WVP" ] || WVP=wpctl-vol
 dev=@DEFAULT_SOURCE@
+export WPCTL_VOL_MAX=153
 
 case "$1" in
 up)   exec "$WVP" step "$dev" 5 ;;
@@ -18,8 +19,16 @@ if [ -n "$SCROLL_STEPS" ]; then
 	"$WVP" scroll "$dev" "$SCROLL_STEPS"
 elif [ -n "$BUTTON" ]; then
 	case $BUTTON in
-	1|2) wpctl set-mute "$dev" toggle ;;
-	3) notify-send "$NF_MIC 麦克风" "0% 最低 · 100% 最高\n滚轮 ±5% · 左/中键静音" ;;
+	1)
+		if command -v pavucontrol >/dev/null 2>&1; then
+			exec setsid -f pavucontrol --tab=1
+		elif command -v helvum >/dev/null 2>&1; then
+			exec setsid -f helvum
+		fi
+		notify-send "$NF_MIC 麦克风" "请安装 pavucontrol 以图形化配置输入设备"
+		;;
+	2) wpctl set-mute "$dev" toggle ;;
+	3) notify-send "$NF_MIC 麦克风" "左键: pavucontrol 录音\n中键: 静音\n滚轮: 增益 ±5%\n状态栏 100% = pavucontrol 153%" ;;
 		4) "$WVP" scroll "$dev" 1 ;;
 		5) "$WVP" scroll "$dev" -1 ;;
 	esac

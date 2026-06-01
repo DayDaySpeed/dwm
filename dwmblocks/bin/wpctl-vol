@@ -1,12 +1,13 @@
 #!/bin/sh
-# PipeWire volume on a 0–100 scale (0 = quietest, 100 = loudest, no boost above 100).
+# PipeWire volume on a linear 0–100 UI scale.
+# UI 0 = min, UI 100 = WPCTL_VOL_MAX% in wpctl/pavucontrol (default 100, mic uses 153).
 #
-#   wpctl-vol pct   <ID>        — print 0–100
-#   wpctl-vol set   <ID> <0-100> — absolute level
-#   wpctl-vol step  <ID> <±N>    — step by N percent points (e.g. 5 or -5)
-#   wpctl-vol scroll <ID> <±steps> — steps × 5% (batch wheel from dwmblocks)
-#   wpctl-vol mute  <ID>        — print 1 if muted else 0
-#   wpctl-vol cap   <ID>        — clamp stored level to 0–100
+#   wpctl-vol pct    <ID>           — print UI 0–100
+#   wpctl-vol set    <ID> <0-100>   — absolute UI level
+#   wpctl-vol step   <ID> <±N>      — step by N UI points
+#   wpctl-vol scroll <ID> <±steps>  — steps × 5 UI points
+#   wpctl-vol mute   <ID>           — print 1 if muted else 0
+#   wpctl-vol cap    <ID>           — clamp to UI scale
 
 set -e
 
@@ -16,12 +17,29 @@ arg=$3
 
 [ -n "$cmd" ] && [ -n "$dev" ] || exit 1
 
+# wpctl/pavucontrol percent cap (100 = 1.0, 153 = 1.53)
+vol_max_pct() {
+	_max=${WPCTL_VOL_MAX:-100}
+	case "$_max" in
+	''|*[!0-9]*) _max=100 ;;
+	esac
+	[ "$_max" -lt 1 ] && _max=100
+	printf '%s\n' "$_max"
+}
+
+vol_limit() {
+	# shellcheck disable=SC2046
+	awk -v m="$(vol_max_pct)" 'BEGIN { printf "%.2f\n", m / 100 }'
+}
+
+# UI 0–100 from wpctl Volume: line (0.0–limit)
 vol_pct_read() {
-	wpctl get-volume "$dev" 2>/dev/null | awk '/Volume:/ {
-		v = int($2 * 100 + 0.5)
-		if (v > 100) v = 100
-		if (v < 0) v = 0
-		print v
+	_max=$(vol_max_pct)
+	wpctl get-volume "$dev" 2>/dev/null | awk -v max="$_max" '/Volume:/ {
+		ui = int($2 * 100 / (max / 100) + 0.5)
+		if (ui > 100) ui = 100
+		if (ui < 0) ui = 0
+		print ui
 		found = 1
 		exit
 	}
@@ -30,25 +48,35 @@ vol_pct_read() {
 
 vol_pct_set() {
 	pct=$1
+	_max=$(vol_max_pct)
 	case "$pct" in
 	''|*[!0-9]*) return 1 ;;
 	esac
 	[ "$pct" -gt 100 ] && pct=100
 	[ "$pct" -lt 0 ] && pct=0
-	wpctl set-volume --limit 1.0 "$dev" "${pct}%" >/dev/null 2>&1
+	wpctl_pct=$(( pct * _max / 100 ))
+	_limit=$(vol_limit)
+	wpctl set-volume -l "$_limit" "$dev" "${wpctl_pct}%" >/dev/null 2>&1
 }
 
 vol_unmute() {
 	wpctl set-mute "$dev" 0 >/dev/null 2>&1 || true
 }
 
-vol_apply_delta() {
-	pct=$(vol_pct_read) || return 1
-	new=$(( pct + $1 ))
-	[ "$new" -gt 100 ] && new=100
-	[ "$new" -lt 0 ] && new=0
+vol_wpctl_delta() {
+	ui_delta=$1
+	_max=$(vol_max_pct)
+	[ "$ui_delta" -eq 0 ] && return 0
+	wpctl_delta=$(( ui_delta * _max / 100 ))
+	[ "$wpctl_delta" -eq 0 ] && wpctl_delta=1
 	vol_unmute
-	vol_pct_set "$new"
+	_limit=$(vol_limit)
+	if [ "$wpctl_delta" -lt 0 ]; then
+		wpctl_delta=$(( -wpctl_delta ))
+		wpctl set-volume -l "$_limit" "$dev" "${wpctl_delta}%-" >/dev/null 2>&1
+	else
+		wpctl set-volume -l "$_limit" "$dev" "${wpctl_delta}%+" >/dev/null 2>&1
+	fi
 }
 
 case "$cmd" in
@@ -59,22 +87,12 @@ set)
 	;;
 step)
 	[ -n "$arg" ] || exit 1
-	vol_apply_delta "$arg"
+	vol_wpctl_delta "$arg"
 	;;
 scroll)
 	steps=$arg
 	[ -n "$steps" ] || exit 1
-	if [ "$steps" -lt 0 ]; then
-		delta=-5
-		inc=1
-	else
-		delta=5
-		inc=-1
-	fi
-	while [ "$steps" != 0 ]; do
-		vol_apply_delta "$delta" || exit 1
-		steps=$(( steps + inc ))
-	done
+	vol_wpctl_delta $(( steps * 5 ))
 	;;
 pct)
 	vol_pct_read
