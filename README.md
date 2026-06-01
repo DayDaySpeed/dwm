@@ -24,6 +24,13 @@ sudo make install
 
 It will be available under `/usr/local/bin/dwm`.
 
+## Usage guide
+
+Detailed keyboard shortcuts, layouts, dwmblocks, and helper scripts (based on the default `config.h`):
+
+- [English](docs/USAGE.md)
+- [简体中文](docs/USAGE.zh-CN.md)
+
 ## dwmblocks
 This repo also contains my build of dwmblocks.
 
