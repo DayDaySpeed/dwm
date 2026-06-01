@@ -346,12 +346,10 @@ dwm.statusgradto:    #E97FC1
 
 ```bash
 IDLE_SEC=600
-xset s "$IDLE_SEC"
-xset +dpms
-xset dpms "$IDLE_SEC" "$IDLE_SEC" "$IDLE_SEC"
+# apply_dpms：先设 dpms 超时，再开启 DPMS（勿只用 xset s，DPMS 仍可能是 30s）
 ```
 
-建议放在 X 会话启动末尾，避免被其他程序覆盖 DPMS 默认值。
+建议放在 X 会话启动末尾，并在启动后延迟再执行一次（见 `~/.xinitrc` 里 `apply_dpms`）。可用 `xset q` 检查：**Screen Saver** 与 **DPMS Standby/Suspend/Off** 都应为 600。
 
 ### UI 缩放（2560×1440 全局 1.35×）
 
