@@ -46,7 +46,7 @@ kill -44 $(pidof dwmblocks)                 # 刷新 clock 模块（signal 10）
 | 终端 | `kitty` | `TERMCMD`，浮动终端类名 `kitty-float` |
 | 启动器 | `rofi` / `dmenu_run` | Super+d / Super+Shift+d |
 | 文件管理器 | `thunar` | Super+Shift+f |
-| 浏览器 | `librewolf-bin` | Super+Shift+w |
+| 浏览器 | `edge` | Super+Shift+w |
 | 脚本目录 | `~/.config/scripts/` | `S_PATH`，相对家目录 |
 | 状态栏字体 | JetBrainsMono Nerd Font + Noto Sans CJK SC | 前者显示 Nerd 图标，后者 fallback 中文 |
 | 音频 | `wpctl` / PipeWire | 音量键通过 `wpctl-vol` 辅助脚本 |
@@ -353,6 +353,22 @@ xset dpms "$IDLE_SEC" "$IDLE_SEC" "$IDLE_SEC"
 
 建议放在 X 会话启动末尾，避免被其他程序覆盖 DPMS 默认值。
 
+### UI 缩放（2560×1440 全局 1.5×）
+
+大屏统一放大，避免「状态栏/输入法太小」与「文件对话框超出屏幕」互相打架：
+
+| 机制 | 配置 | 作用 |
+|------|------|------|
+| X11 / dwm | `~/.Xresources` → `Xft.dpi: 144` | 状态栏、dmenu 等 Xft 字体 |
+| GTK | `gtk-xft-dpi=147456`（144×1024） | Thunar、portal 文件对话框 |
+| Qt / fcitx5 | `QT_SCALE_FACTOR=1.5` + `classicui.conf` | 输入法候选框 |
+| Electron | `~/.config/electron-flags.conf` → `1.5` | Cursor 等 |
+| dwm 字号 | `config.h` 中 `size=14` | 标签栏/标题（配合 144 DPI） |
+
+**不要**再设 `GDK_SCALE=1` / `GDK_DPI_SCALE=1` 强制缩小，否则 GTK 对话框会与 Xft 缩放不一致而错位超出屏幕。
+
+修改后重新登录 X 会话。若仍想更大，把 `Xft.dpi` 改为 `156`（1.625×）或 `168`（1.75×），并同步 `gtk-xft-dpi`（= 新 DPI × 1024）与 `QT_SCALE_FACTOR`。
+
 ## 系统操作
 
 | 快捷键 | 功能 |
@@ -372,7 +388,7 @@ xset dpms "$IDLE_SEC" "$IDLE_SEC" "$IDLE_SEC"
 | **Super + d** | Rofi 应用启动器 |
 | **Super + Shift + d** | dmenu 应用启动器 |
 | **Super + Shift + f** | 文件管理器（`thunar`） |
-| **Super + Shift + w** | 浏览器（`librewolf-bin`） |
+| **Super + Shift + w** | 浏览器（`edge`） |
 
 ## 脚本快捷键
 

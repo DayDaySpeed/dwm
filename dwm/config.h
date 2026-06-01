@@ -17,8 +17,8 @@ static unsigned int systrayspacing = 2;   /* systray spacing */
 static int systraypinningfailfirst = 1;   /* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
 static int showsystray             = 1;   /* 0 means no systray */
 /* These values are set for a 2560x1440 monitor (T470p). Change to 10px, 10px for a smaller monitor (1366x768 on T440p) */
-static char *fonts[]          = { "JetBrainsMono Nerd Font:size=12", "Noto Sans CJK SC:size=12" };
-static char dmenufont[]       = "JetBrainsMono Nerd Font:size=12";
+static char *fonts[]          = { "JetBrainsMono Nerd Font:size=14", "Noto Sans CJK SC:size=14" };
+static char dmenufont[]       = "JetBrainsMono Nerd Font:size=14";
 static char normbgcolor[]     = "#15181E"; // Bar bg color
 static char normfgcolor[]     = "#7FC1E9"; // Bar fg color
 static char statusgradfrom[]  = "#7FC1E9"; // Status text gradient start (left)
