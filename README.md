@@ -465,6 +465,23 @@ memory │ cpu │ fanspeed │ internet │ bluetooth │ battery │ clock │
 
 修改 `delim` 或上述变量后，复制 `bin/` 到 PATH 并重启 dwmblocks；改 `dwmblocks/config.h` 中的 `delim` 需重新编译 dwmblocks。
 
+### 状态栏图标（Nerd Fonts）
+
+模块左侧图标定义在 `dwmblocks/bin/icons`（如 `NF_WIFI=󰤨`），需使用 **Nerd Font**（本配置为 JetBrainsMono Nerd Font）。
+
+查找与复制新图标：
+
+- **[Nerd Fonts Cheat Sheet](https://www.nerdfonts.com/cheat-sheet)** — 按名称搜索 MDI / Font Awesome 等图标，复制字符后写入 `icons`
+- 在网站上将字体选为 **JetBrainsMono Nerd Font**，与状态栏一致，避免缺字方框
+- v3.0 起部分旧 MDI 码位已迁移；若搜不到，用图标英文名搜索（如 `altimeter` 而非 `nf-mdi-altimeter`）
+
+示例（`dwmblocks/bin/icons`）：
+
+```sh
+NF_WIFI=󰤨
+NF_MIC=󰍬
+```
+
 ### 模块刷新信号
 
 向 dwmblocks 发信号可立即刷新对应模块：`kill -(34 + signal) $(pidof dwmblocks)`

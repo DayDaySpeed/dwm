@@ -1,5 +1,6 @@
 # Nerd Font icons (Material Design) for dwmblocks status scripts.
 # Requires a Nerd Font in the dwm bar, e.g. JetBrainsMono Nerd Font.
+# Find icons: https://www.nerdfonts.com/cheat-sheet
 
 # Audio
 NF_VOL_HIGH=󰕾
