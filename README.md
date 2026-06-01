@@ -451,7 +451,7 @@ IDLE_SEC=600
 状态栏模块顺序（分隔符 ` │ `，两侧有空格）：
 
 ```
-memory │ cpu │ fanspeed │ internet │ bluetooth │ battery │ clock │ volume │ brightness │ mic
+memory │ cpu │ fanspeed │ internet │ bluetooth │ battery │ volume │ brightness │ mic │ clock
 ```
 
 模块内间距由 `dwmblocks/bin/dwmblocks-lib` 控制：
