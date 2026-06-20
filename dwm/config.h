@@ -43,7 +43,7 @@ static const unsigned int alphas[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
+static const char *tags[] = { "", "", "3", "4", "5", "6", "7", "8", "" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -130,7 +130,7 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *browsercmd[] = { "edge", NULL };
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbordercolor, "-sf", selfgcolor, NULL };
 static const char *filemgrcmd[] = { "thunar", NULL };
-static const char *roficmd[]    = { "rofi", "-show-icons", "-show", "drun", "-sidebar-mode", "-columns", "3", "-dpi", "1", NULL };
+static const char *roficmd[]    = { "rofi", "-show-icons", "-show", "drun", "-sidebar-mode", "-columns", "3", "-dpi", "1", "-terminal", TERMCMD, NULL };
 static const char *termcmd[]    = { TERMCMD, NULL };
 static const char scratchpadname[] = "scratchpad";
 static const char *scratchpadcmd[] = { TERMCMD, "-t", scratchpadname, "-g", "120x34", NULL };
