@@ -2,6 +2,8 @@
 
 基于 [dwm](https://dwm.suckless.org) 6.5 的定制构建（补丁、dwmblocks、slock）。
 
+![Neovim 速查表](screenshot.png)
+
 ## 文档
 
 | 语言 | 文件 |
