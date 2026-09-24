@@ -443,6 +443,7 @@ IDLE_SEC=600
 |--------|------|
 | **Print** | 区域截图（`flameshot gui`，框选并标注，保存至 `~/Pictures/`） |
 | **Super + Print** | 区域截图（`flameshot gui`） |
+| **Super + Shift + S** | 区域截图（`flameshot gui`） |
 | **XF86AudioMute** | 静音/取消静音，并刷新状态栏音量 |
 | **XF86AudioLowerVolume** | 音量 −5% |
 | **XF86AudioRaiseVolume** | 音量 +5% |

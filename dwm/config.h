@@ -282,6 +282,7 @@ static const Key keys[] = {
 	/* { 0, XK_Caps_Lock, spawn, SHCMD("kill -35 $(pidof dwmblocks)") }, */ /* signal 1: enable capslock block first */
 	{ 0,      XK_Print,      spawn,  SHCMD("flameshot gui -p \"$HOME/Pictures\"") },
 	{ MODKEY, XK_Print,	     spawn,  SHCMD("flameshot gui -p \"$HOME/Pictures\"") },
+	{ MODKEY|ShiftMask, XK_s, spawn,  SHCMD("flameshot gui -p \"$HOME/Pictures\"") }, // Screenshot
 
 	/* Scripts */
 	{ SUPERKEY,           XK_d,      spawn, { .v = &scripts[0] } }, // Select display
