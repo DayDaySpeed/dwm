@@ -217,7 +217,7 @@ Also: `killkittytag` — close visible `kitty` / `kitty-float` on current tag (v
 
 | Shortcut | Action |
 |----------|--------|
-| **Print** / **Super + Print** | Region screenshot (`flameshot gui` → `~/Pictures/`) |
+| **Print** / **Super + Print** / **Super + Shift + S** | Region screenshot (`flameshot gui` → `~/Pictures/`) |
 | **XF86Audio*** | Mute/volume/mic via `wpctl`; refresh status modules |
 | **XF86MonBrightness*** | Brightness ±10% |
 | **XF86Touchpad*** | Touchpad (`synclient`) |
